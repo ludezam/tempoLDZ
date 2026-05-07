@@ -144,6 +144,16 @@ document.addEventListener("DOMContentLoaded", () => {
     return "☁️";
   }
 
+  function formatarVelocidadeVento(velocidade) {
+    if (!Number.isFinite(velocidade)) return "-- km/h";
+    return `${velocidade.toFixed(0)} km/h`;
+  }
+
+  function formatarDirecaoVento(direcao) {
+    if (!Number.isFinite(direcao)) return "direção indisponível";
+    return `${Math.round(direcao)}°`;
+  }
+
   function obterChaveHoraAtualSaoPaulo() {
     const agora = new Date();
     const partes = new Intl.DateTimeFormat("sv-SE", {
@@ -169,18 +179,24 @@ document.addEventListener("DOMContentLoaded", () => {
       time,
       temp: hourly.temperature_2m[indiceInicial + i],
       precip: hourly.precipitation[indiceInicial + i],
-      prob: hourly.precipitation_probability[indiceInicial + i]
+      prob: hourly.precipitation_probability[indiceInicial + i],
+      windSpeed: hourly.wind_speed_10m[indiceInicial + i],
+      windDirection: hourly.wind_direction_10m[indiceInicial + i]
     }));
 
     previsao12hEl.innerHTML = proximas12.map(item => {
       const horario = item.time.slice(11, 16);
 
       return `
-        <article class="previsao-card" role="listitem" aria-label="Previsão para ${horario}">
+        <article class="previsao-card" role="listitem" aria-label="Previsão para ${horario}, vento ${formatarVelocidadeVento(item.windSpeed)} na direção ${formatarDirecaoVento(item.windDirection)}">
           <div class="hora">${horario}</div>
           <div class="icone-clima">${iconePorProbabilidade(item.prob)}</div>
           <div class="temperatura">${item.temp.toFixed(0)}°C</div>
           <div class="chuva">${item.prob}% · ${item.precip.toFixed(1)} mm</div>
+          <div class="vento-card" aria-label="Vento ${formatarVelocidadeVento(item.windSpeed)} na direção ${formatarDirecaoVento(item.windDirection)}">
+            <span class="seta-vento" style="--direcao-vento: ${Number.isFinite(item.windDirection) ? item.windDirection : 0}deg" aria-hidden="true">↑</span>
+            <span class="velocidade-vento">${formatarVelocidadeVento(item.windSpeed)}</span>
+          </div>
         </article>
       `;
     }).join("");
@@ -267,7 +283,7 @@ document.addEventListener("DOMContentLoaded", () => {
   async function atualizarPrevisao() {
     try {
       const r = await fetch(
-        `https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&hourly=precipitation_probability,precipitation,temperature_2m,wind_speed_10m&timezone=America/Sao_Paulo`
+        `https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&hourly=precipitation_probability,precipitation,temperature_2m,wind_speed_10m,wind_direction_10m&timezone=America/Sao_Paulo`
       );
 
       if (!r.ok) throw "Erro na previsão";

@@ -100,7 +100,7 @@ document.addEventListener("DOMContentLoaded", () => {
     cidadeAtualEl.innerHTML = `📍 Cidade: <b>${nome}</b>`;
   }
 
-  function atualizarMapa(nomeCidade = "Local atual") {
+  function atualizarMapa(nomeCidade = nomeCidadeAtual) {
     if (!mapaRadarEl) return;
 
     mapaRadarEl.src = `https://www.rainviewer.com/map.html?loc=${LAT},${LON},10&oCS=1&c=3&o=83&lm=1&layer=radar&sm=1&sn=1`;
@@ -270,7 +270,7 @@ document.addEventListener("DOMContentLoaded", () => {
       LAT = pos.coords.latitude;
       LON = pos.coords.longitude;
 
-      let nomeCidade = "Local atual";
+      let nomeCidade = nomeCidadeAtual;
 
       try {
         nomeCidade = await obterNomeCidadePorCoordenadas(LAT, LON);

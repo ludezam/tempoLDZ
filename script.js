@@ -92,22 +92,56 @@ document.addEventListener("DOMContentLoaded", () => {
     return formatarNomeCidade(resultado);
   }
 
-  function iconePorProbabilidade(prob) {
-    if (prob >= 70) return "⛈️";
-    if (prob >= 40) return "🌧️";
-    if (prob >= 20) return "🌦️";
+  function temChuvaPrevista(prob, precip) {
+    return (Number.isFinite(precip) && precip > 0) || (Number.isFinite(prob) && prob >= 40);
+  }
+
+  function iconePorClima({ prob, precip, temp }) {
+    if (temChuvaPrevista(prob, precip)) {
+      if (Number.isFinite(precip) && precip >= 4) return "⛈️";
+      if (Number.isFinite(precip) && precip >= 1) return "🌧️";
+      return "🌦️";
+    }
+
+    if (Number.isFinite(temp) && temp < 15) return "❄️";
+    if (Number.isFinite(temp) && temp >= 35) return "🔥";
+    if (Number.isFinite(temp) && temp > 28 && temp <= 34) return "☀️";
+
     return "☁️";
   }
 
-  function classeCardPorProbabilidade(prob) {
-    if (!Number.isFinite(prob) || prob < 40) return "";
-    if (prob < 60) return " previsao-card--chuva-moderada";
-    return " previsao-card--chuva-forte";
+  function classeCardPorClima({ prob, precip, temp }) {
+    if (temChuvaPrevista(prob, precip)) {
+      if (Number.isFinite(precip) && precip >= 4) return " previsao-card--chuva-forte";
+      if (Number.isFinite(precip) && precip >= 1) return " previsao-card--chuva-moderada";
+      return " previsao-card--chuva-fraca";
+    }
+
+    if (Number.isFinite(temp) && temp < 15) return " previsao-card--frio";
+    if (Number.isFinite(temp) && temp >= 35) return " previsao-card--calor-extremo";
+    if (Number.isFinite(temp) && temp > 28 && temp <= 34) return " previsao-card--sol";
+
+    return "";
   }
 
-  function classeCardPorTemperatura(temperatura) {
-    if (!Number.isFinite(temperatura) || temperatura >= 15) return "";
-    return " previsao-card--frio";
+  function ilustracaoPorClima({ prob, precip, temp }) {
+    if (temChuvaPrevista(prob, precip)) {
+      return '<div class="ilustracao-chuva" aria-hidden="true"><span></span><span></span><span></span></div>';
+    }
+
+    if (Number.isFinite(temp) && temp < 15) {
+      return '<div class="ilustracao-frio" aria-hidden="true"><span>❄</span><span>✦</span><span>❅</span></div>';
+    }
+
+    if (Number.isFinite(temp) && temp >= 35) {
+      return '<div class="ilustracao-calor" aria-hidden="true"><span>🔥</span><span></span></div>';
+    }
+
+    if (Number.isFinite(temp) && temp > 28 && temp <= 34) {
+      return '<div class="ilustracao-sol" aria-hidden="true"><span>☀</span></div>';
+    }
+
+    return "";
   }
 
   function formatarVelocidadeVento(velocidade) {
@@ -153,15 +187,14 @@ document.addEventListener("DOMContentLoaded", () => {
     previsao12hEl.innerHTML = proximas12.map(item => {
       const horario = item.time.slice(11, 16);
 
-      const classeChuva = classeCardPorProbabilidade(item.prob);
-      const classeFrio = classeCardPorTemperatura(item.temp);
-      const estaFrio = classeFrio !== "";
+      const clima = { prob: item.prob, precip: item.precip, temp: item.temp };
+      const classeClima = classeCardPorClima(clima);
 
       return `
-        <article class="previsao-card${classeChuva}${classeFrio}" role="listitem" aria-label="Previsão para ${horario}, temperatura ${item.temp.toFixed(0)}°C, vento ${formatarVelocidadeVento(item.windSpeed)} na direção ${formatarDirecaoVento(item.windDirection)}">
-          ${estaFrio ? '<div class="ilustracao-frio" aria-hidden="true"><span>❄</span><span>✦</span><span>❅</span></div>' : ''}
+        <article class="previsao-card${classeClima}" role="listitem" aria-label="Previsão para ${horario}, temperatura ${item.temp.toFixed(0)}°C, vento ${formatarVelocidadeVento(item.windSpeed)} na direção ${formatarDirecaoVento(item.windDirection)}">
+          ${ilustracaoPorClima(clima)}
           <div class="hora">${horario}</div>
-          <div class="icone-clima">${estaFrio ? "❄️" : iconePorProbabilidade(item.prob)}</div>
+          <div class="icone-clima">${iconePorClima(clima)}</div>
           <div class="temperatura">${item.temp.toFixed(0)}°C</div>
           <div class="chuva">${item.prob}% · ${item.precip.toFixed(1)} mm</div>
           <div class="vento-card" aria-label="Vento ${formatarVelocidadeVento(item.windSpeed)} na direção ${formatarDirecaoVento(item.windDirection)}">

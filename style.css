@@ -265,3 +265,131 @@ small {
   font-size: 1.1rem;
   opacity: 0.7;
 }
+
+.previsao-card--chuva-fraca,
+.previsao-card--chuva-moderada,
+.previsao-card--chuva-forte,
+.previsao-card--sol,
+.previsao-card--calor-extremo {
+  position: relative;
+  overflow: hidden;
+}
+
+.previsao-card--chuva-fraca {
+  background:
+    linear-gradient(180deg, rgba(126, 185, 255, 0.16) 0 1px, transparent 1px) 0 0 / 22px 22px,
+    linear-gradient(145deg, #244763 0%, #18314b 52%, #12243a 100%);
+  border-color: rgba(126, 185, 255, 0.34);
+  box-shadow: 0 10px 24px rgba(82, 155, 230, 0.13);
+}
+
+.previsao-card--chuva-moderada {
+  background:
+    linear-gradient(115deg, rgba(159, 208, 255, 0.22) 0 2px, transparent 2px 18px) 0 0 / 24px 28px,
+    linear-gradient(145deg, #203d5a 0%, #172d45 48%, #101e32 100%);
+  border-color: rgba(97, 171, 255, 0.42);
+  box-shadow: 0 10px 24px rgba(75, 146, 230, 0.16);
+}
+
+.previsao-card--chuva-forte {
+  background:
+    linear-gradient(112deg, rgba(208, 232, 255, 0.36) 0 3px, transparent 3px 16px) 0 0 / 22px 24px,
+    radial-gradient(circle at 80% 18%, rgba(255, 234, 130, 0.9) 0 2px, transparent 3px),
+    linear-gradient(145deg, #243046 0%, #172133 48%, #0c1424 100%);
+  border-color: rgba(142, 197, 255, 0.52);
+  box-shadow: 0 12px 28px rgba(67, 129, 218, 0.22);
+}
+
+.previsao-card--sol {
+  background:
+    radial-gradient(circle at 78% 18%, rgba(255, 232, 93, 0.95) 0 18px, rgba(255, 197, 46, 0.3) 19px 28px, transparent 29px),
+    linear-gradient(160deg, #78cdf6 0%, #4eb0ee 54%, #2a88d2 100%);
+  border-color: rgba(164, 224, 255, 0.62);
+  box-shadow: 0 12px 28px rgba(78, 176, 238, 0.22);
+}
+
+.previsao-card--calor-extremo {
+  background:
+    radial-gradient(circle at 82% 24%, rgba(255, 96, 35, 0.88) 0 10px, rgba(255, 186, 66, 0.5) 11px 25px, transparent 26px),
+    linear-gradient(180deg, transparent 0 62%, rgba(116, 57, 20, 0.5) 63% 100%),
+    linear-gradient(145deg, #ff9f43 0%, #d86225 45%, #78331d 100%);
+  border-color: rgba(255, 181, 77, 0.58);
+  box-shadow: 0 12px 30px rgba(255, 104, 45, 0.24);
+}
+
+.previsao-card--chuva-fraca::before,
+.previsao-card--chuva-moderada::before,
+.previsao-card--chuva-forte::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(115deg, transparent 0 45%, rgba(214, 235, 255, 0.42) 46% 48%, transparent 49% 100%) 0 0 / 30px 34px;
+  opacity: 0.32;
+}
+
+.previsao-card--chuva-moderada::before {
+  opacity: 0.5;
+  background-size: 24px 28px;
+}
+
+.previsao-card--chuva-forte::before {
+  opacity: 0.72;
+  background-size: 18px 22px;
+}
+
+.previsao-card--chuva-fraca > *:not(.ilustracao-chuva),
+.previsao-card--chuva-moderada > *:not(.ilustracao-chuva),
+.previsao-card--chuva-forte > *:not(.ilustracao-chuva),
+.previsao-card--sol > *:not(.ilustracao-sol),
+.previsao-card--calor-extremo > *:not(.ilustracao-calor) {
+  position: relative;
+  z-index: 1;
+}
+
+.ilustracao-chuva,
+.ilustracao-sol,
+.ilustracao-calor {
+  position: absolute;
+  inset: 8px 8px auto auto;
+  width: 58px;
+  height: 58px;
+  pointer-events: none;
+}
+
+.ilustracao-chuva span {
+  position: absolute;
+  top: 6px;
+  width: 4px;
+  height: 42px;
+  border-radius: 999px;
+  background: rgba(207, 232, 255, 0.82);
+  transform: rotate(22deg);
+  box-shadow: 0 0 8px rgba(170, 220, 255, 0.35);
+}
+
+.ilustracao-chuva span:nth-child(1) { right: 10px; opacity: 0.95; }
+.ilustracao-chuva span:nth-child(2) { right: 28px; top: 14px; opacity: 0.7; }
+.ilustracao-chuva span:nth-child(3) { right: 44px; top: 2px; opacity: 0.55; }
+
+.ilustracao-sol span,
+.ilustracao-calor span:first-child {
+  font-size: 2.8rem;
+  line-height: 1;
+  filter: drop-shadow(0 0 10px rgba(255, 228, 94, 0.55));
+}
+
+.ilustracao-sol span {
+  color: #ffe45e;
+}
+
+.ilustracao-calor span:last-child {
+  position: absolute;
+  left: 2px;
+  right: 4px;
+  bottom: 8px;
+  height: 12px;
+  border-radius: 999px 999px 4px 4px;
+  background: linear-gradient(90deg, #b96a2f, #f0b35a, #9f5128);
+  opacity: 0.8;
+}

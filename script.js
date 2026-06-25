@@ -105,6 +105,11 @@ document.addEventListener("DOMContentLoaded", () => {
     return " previsao-card--chuva-forte";
   }
 
+  function classeCardPorTemperatura(temperatura) {
+    if (!Number.isFinite(temperatura) || temperatura >= 15) return "";
+    return " previsao-card--frio";
+  }
+
   function formatarVelocidadeVento(velocidade) {
     if (!Number.isFinite(velocidade)) return "-- km/h";
     return `${velocidade.toFixed(0)} km/h`;
@@ -149,11 +154,14 @@ document.addEventListener("DOMContentLoaded", () => {
       const horario = item.time.slice(11, 16);
 
       const classeChuva = classeCardPorProbabilidade(item.prob);
+      const classeFrio = classeCardPorTemperatura(item.temp);
+      const estaFrio = classeFrio !== "";
 
       return `
-        <article class="previsao-card${classeChuva}" role="listitem" aria-label="Previsão para ${horario}, vento ${formatarVelocidadeVento(item.windSpeed)} na direção ${formatarDirecaoVento(item.windDirection)}">
+        <article class="previsao-card${classeChuva}${classeFrio}" role="listitem" aria-label="Previsão para ${horario}, temperatura ${item.temp.toFixed(0)}°C, vento ${formatarVelocidadeVento(item.windSpeed)} na direção ${formatarDirecaoVento(item.windDirection)}">
+          ${estaFrio ? '<div class="ilustracao-frio" aria-hidden="true"><span>❄</span><span>✦</span><span>❅</span></div>' : ''}
           <div class="hora">${horario}</div>
-          <div class="icone-clima">${iconePorProbabilidade(item.prob)}</div>
+          <div class="icone-clima">${estaFrio ? "❄️" : iconePorProbabilidade(item.prob)}</div>
           <div class="temperatura">${item.temp.toFixed(0)}°C</div>
           <div class="chuva">${item.prob}% · ${item.precip.toFixed(1)} mm</div>
           <div class="vento-card" aria-label="Vento ${formatarVelocidadeVento(item.windSpeed)} na direção ${formatarDirecaoVento(item.windDirection)}">

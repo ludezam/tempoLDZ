@@ -104,6 +104,8 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function iconePorClima({ prob, precip, temp, cloudCover }) {
+    if (Number.isFinite(temp) && temp < 15) return "❄️";
+
     if (temChuvaPrevista(prob, precip)) {
       if (Number.isFinite(precip) && precip >= 4) return "⛈️";
       if (Number.isFinite(precip) && precip >= 1) return "🌧️";
@@ -114,7 +116,6 @@ document.addEventListener("DOMContentLoaded", () => {
     if (nebulosidade === "muito") return "☁️";
     if (nebulosidade === "pouco") return "🌥️";
 
-    if (Number.isFinite(temp) && temp < 15) return "❄️";
     if (Number.isFinite(temp) && temp >= 35) return "🔥";
     if (Number.isFinite(temp) && temp > 28 && temp <= 34) return "☀️";
     if (Number.isFinite(temp) && temp >= 16 && temp <= 28) return "🌤️";
@@ -123,6 +124,8 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function classeCardPorClima({ prob, precip, temp, cloudCover }) {
+    if (Number.isFinite(temp) && temp < 15) return " previsao-card--frio";
+
     if (temChuvaPrevista(prob, precip)) {
       if (Number.isFinite(precip) && precip >= 4) return " previsao-card--chuva-forte";
       if (Number.isFinite(precip) && precip >= 1) return " previsao-card--chuva-moderada";
@@ -133,7 +136,6 @@ document.addEventListener("DOMContentLoaded", () => {
     if (nebulosidade === "muito") return " previsao-card--muito-nublado";
     if (nebulosidade === "pouco") return " previsao-card--pouco-nublado";
 
-    if (Number.isFinite(temp) && temp < 15) return " previsao-card--frio";
     if (Number.isFinite(temp) && temp >= 35) return " previsao-card--calor-extremo";
     if (Number.isFinite(temp) && temp > 28 && temp <= 34) return " previsao-card--sol";
     if (Number.isFinite(temp) && temp >= 16 && temp <= 28) return " previsao-card--ameno";
@@ -142,6 +144,10 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function ilustracaoPorClima({ prob, precip, temp, cloudCover }) {
+    if (Number.isFinite(temp) && temp < 15) {
+      return '<div class="ilustracao-frio" aria-hidden="true"><span>❄</span><span>✦</span><span>❅</span></div>';
+    }
+
     if (temChuvaPrevista(prob, precip)) {
       return '<div class="ilustracao-chuva" aria-hidden="true"><span></span><span></span><span></span></div>';
     }
@@ -149,10 +155,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const nebulosidade = grauNebulosidade(cloudCover);
     if (nebulosidade) {
       return `<div class="ilustracao-nublado ilustracao-nublado--${nebulosidade}" aria-hidden="true"><span></span><span></span><span></span></div>`;
-    }
-
-    if (Number.isFinite(temp) && temp < 15) {
-      return '<div class="ilustracao-frio" aria-hidden="true"><span>❄</span><span>✦</span><span>❅</span></div>';
     }
 
     if (Number.isFinite(temp) && temp >= 35) {

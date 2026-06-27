@@ -123,6 +123,37 @@ document.addEventListener("DOMContentLoaded", () => {
     return "☁️";
   }
 
+  function periodoLuzDoDia(time) {
+    const hora = Number(time?.slice(11, 13));
+
+    if (!Number.isFinite(hora)) return null;
+    if (hora >= 5 && hora < 7) return "amanhecer";
+    if (hora >= 17 && hora < 19) return "anoitecer";
+    if (hora >= 19 || hora < 5) return "noite";
+
+    return null;
+  }
+
+  function classeCardPorPeriodo(periodo) {
+    return periodo ? ` previsao-card--${periodo}` : "";
+  }
+
+  function ilustracaoPorPeriodo(periodo) {
+    if (periodo === "amanhecer") {
+      return '<div class="ilustracao-periodo ilustracao-periodo--amanhecer" aria-hidden="true"><span></span><span></span><span></span></div>';
+    }
+
+    if (periodo === "anoitecer") {
+      return '<div class="ilustracao-periodo ilustracao-periodo--anoitecer" aria-hidden="true"><span></span><span></span><span></span></div>';
+    }
+
+    if (periodo === "noite") {
+      return '<div class="ilustracao-periodo ilustracao-periodo--noite" aria-hidden="true"><span></span><span></span><span></span><span></span></div>';
+    }
+
+    return "";
+  }
+
   function classeCardPorClima({ prob, precip, temp, cloudCover }) {
     if (Number.isFinite(temp) && temp < 15) return " previsao-card--frio";
 
@@ -217,11 +248,14 @@ document.addEventListener("DOMContentLoaded", () => {
       const horario = item.time.slice(11, 16);
 
       const clima = { prob: item.prob, precip: item.precip, temp: item.temp, cloudCover: item.cloudCover };
+      const periodo = periodoLuzDoDia(item.time);
       const classeClima = classeCardPorClima(clima);
+      const classePeriodo = classeCardPorPeriodo(periodo);
 
       return `
-        <article class="previsao-card${classeClima}" role="listitem" aria-label="Previsão para ${horario}, temperatura ${item.temp.toFixed(0)}°C, vento ${formatarVelocidadeVento(item.windSpeed)} na direção ${formatarDirecaoVento(item.windDirection)}">
+        <article class="previsao-card${classeClima}${classePeriodo}" role="listitem" aria-label="Previsão para ${horario}, temperatura ${item.temp.toFixed(0)}°C, vento ${formatarVelocidadeVento(item.windSpeed)} na direção ${formatarDirecaoVento(item.windDirection)}">
           ${ilustracaoPorClima(clima)}
+          ${ilustracaoPorPeriodo(periodo)}
           <div class="hora">${horario}</div>
           <div class="icone-clima">${iconePorClima(clima)}</div>
           <div class="temperatura">${item.temp.toFixed(0)}°C</div>

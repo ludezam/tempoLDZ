@@ -1,256 +1,790 @@
-body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  color: white;
-  min-height: 100vh;
+/* =====================================================
+   RESET
+===================================================== */
 
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-
-  padding: 14px;
-  overflow-x: hidden;
-
-  background: radial-gradient(circle at top, #1b3a57 0%, #0b1220 60%, #05070f 100%);
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
 }
 
-/* ================= CÉU ================= */
-
-.sun, .moon {
-  position: fixed;
-  width: 100px;
-  height: 100px;
-  border-radius: 50%;
-  transition: all 1s linear;
-  z-index: 0;
-  pointer-events: none;
+html,
+body{
+width:100%;
+min-height:100%;
+overflow-x:hidden;
 }
 
-.sun {
-  background: radial-gradient(circle, #ffd76a, #ff9f1c);
-  box-shadow: 0 0 80px rgba(255,200,0,0.5);
+body{
+
+font-family:
+-apple-system,
+BlinkMacSystemFont,
+"SF Pro Display",
+"Segoe UI",
+sans-serif;
+
+color:#fff;
+
+display:flex;
+flex-direction:column;
+align-items:center;
+
+padding:16px;
+
+position:relative;
+
+background:#0b1220;
 }
 
-.moon {
-  background: radial-gradient(circle, #f5f5f5, #cfd8dc);
-  box-shadow: 0 0 50px rgba(255,255,255,0.4);
+/* =====================================================
+   CÉU DINÂMICO
+===================================================== */
+
+#sky{
+
+position:fixed;
+inset:0;
+
+z-index:-20;
+
+transition:
+background 5s linear;
+
+background:
+linear-gradient(
+180deg,
+#09101d 0%,
+#0f1729 100%
+);
 }
 
-/* ================= ESTRELAS ================= */
+/* =====================================================
+   SOL
+===================================================== */
 
-.stars-layer {
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  transition: opacity 1s;
-  z-index: 0;
+.sun{
+
+position:fixed;
+
+width:120px;
+height:120px;
+
+border-radius:50%;
+
+background:
+radial-gradient(
+circle,
+#fff8c7 0%,
+#ffe27a 40%,
+#ffba3a 70%,
+transparent 100%
+);
+
+box-shadow:
+0 0 30px rgba(255,220,120,.8),
+0 0 80px rgba(255,190,50,.5),
+0 0 160px rgba(255,180,70,.25);
+
+pointer-events:none;
+
+transition:
+opacity 1s linear,
+left 1s linear,
+top 1s linear,
+filter 1s linear;
+
+z-index:-5;
 }
 
-.star {
-  position: absolute;
-  background: white;
-  border-radius: 50%;
-  animation: twinkle 2s infinite alternate;
+/* =====================================================
+   LUA
+===================================================== */
+
+.moon{
+
+position:fixed;
+
+width:90px;
+height:90px;
+
+border-radius:50%;
+
+background:
+radial-gradient(
+circle at 35% 35%,
+#ffffff,
+#d6dde5 70%
+);
+
+box-shadow:
+0 0 25px rgba(255,255,255,.3),
+0 0 60px rgba(255,255,255,.15);
+
+pointer-events:none;
+
+transition:all 1s linear;
+
+z-index:-5;
 }
 
-@keyframes twinkle {
-  from { opacity: 0.2; transform: scale(0.8); }
-  to   { opacity: 1; transform: scale(1.4); }
+/* =====================================================
+   VIA LÁCTEA
+===================================================== */
+
+.milkyway{
+
+position:fixed;
+inset:0;
+
+opacity:0;
+
+pointer-events:none;
+
+z-index:-11;
+
+background:
+radial-gradient(
+ellipse at center,
+rgba(255,255,255,.08),
+transparent 70%
+);
+
+filter:
+blur(50px);
+
+transition:
+opacity 3s ease;
 }
 
-/* ================= CHUVA ================= */
+/* =====================================================
+   ESTRELAS
+===================================================== */
 
-.rain-layer {
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 0;
+.stars-layer{
+
+position:fixed;
+inset:0;
+
+overflow:hidden;
+
+pointer-events:none;
+
+z-index:-10;
+
+transition:
+opacity 2s;
 }
 
-.drop {
-  position: absolute;
-  width: 2px;
-  height: 110px;
-  background: linear-gradient(to bottom, transparent, rgba(255,255,255,0.5));
-  animation: rainFall linear infinite;
+.star{
+
+position:absolute;
+
+background:white;
+
+border-radius:50%;
+
+animation:
+twinkle ease-in-out infinite alternate;
 }
 
-@keyframes rainFall {
-  to { transform: translateY(120vh); }
+@keyframes twinkle{
+
+from{
+opacity:.15;
+transform:scale(.8);
 }
 
-/* ================= CONTAINER ================= */
-
-section, header {
-  width: min(850px, 100%);
-  z-index: 1;
+to{
+opacity:1;
+transform:scale(1.4);
 }
 
-/* ================= TOPO ================= */
-
-.topo {
-  text-align: center;
-  margin-bottom: 12px;
 }
 
-/* ================= RESUMO ================= */
+/* =====================================================
+   ESTRELA CADENTE
+===================================================== */
 
-.resumo-clima {
-  background: rgba(255,255,255,0.08);
-  backdrop-filter: blur(18px);
-  border-radius: 22px;
-  padding: 8px;
-  margin-bottom: 0px;
+.meteor{
+
+position:fixed;
+
+width:180px;
+height:2px;
+
+background:
+linear-gradient(
+90deg,
+white,
+transparent
+);
+
+z-index:-8;
+
+pointer-events:none;
+
+animation:
+meteorMove 2s linear forwards;
 }
 
-.temperatura-principal {
-  font-size: 64px;
-  font-weight: 200;
+@keyframes meteorMove{
+
+from{
+transform:
+translate(0,0)
+rotate(-30deg);
+opacity:1;
 }
 
-/* STATUS */
-
-.status {
-  margin-top: 6px;
-  font-weight: 500;
+to{
+transform:
+translate(-500px,300px)
+rotate(-30deg);
+opacity:0;
 }
 
-.status-verde { color: #34c759; }
-.status-amarelo { color: #ffcc00; }
-.status-vermelho { color: #ff3b30; }
-
-.descricao {
-  opacity: 0.75;
-  margin-top: 6px;
 }
 
-/* DADOS */
+/* =====================================================
+   NUVENS
+===================================================== */
 
-.dados-resumo {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-  margin-top: 12px;
+.cloud-layer{
+
+position:fixed;
+inset:0;
+
+overflow:hidden;
+
+pointer-events:none;
 }
 
-.item {
-  background: rgba(255,255,255,0.08);
-  padding: 10px;
-  border-radius: 14px;
-  text-align: center;
+.cloud-back{
+z-index:-7;
 }
 
-.item span {
-  display: block;
-  font-size: 0.8rem;
-  opacity: 0.7;
+.cloud-front{
+z-index:-3;
 }
 
-.item strong {
-  display: block;
-  margin-top: 4px;
+.cloud{
+
+position:absolute;
+
+border-radius:999px;
+
+background:
+radial-gradient(
+ellipse at center,
+rgba(255,255,255,.80),
+rgba(255,255,255,.25)
+);
+
+filter:blur(18px);
+
+opacity:.8;
 }
 
-/* ================= CONTROLES ================= */
+@keyframes cloudMove{
 
-.controles {
-  display: grid;
-  gap: 10px;
-  margin-bottom: 12px;
+from{
+transform:translateX(-20vw);
 }
 
-input, button {
-  padding: 12px;
-  border-radius: 14px;
-  border: none;
-  font-size: 1rem;
+to{
+transform:translateX(120vw);
 }
 
-input {
-  background: rgba(255,255,255,0.1);
-  color: white;
 }
 
-button {
-  background: rgba(255,255,255,0.12);
-  color: white;
-  cursor: pointer;
+/* =====================================================
+   NEBLINA
+===================================================== */
+
+.fog-layer{
+
+position:fixed;
+inset:0;
+
+pointer-events:none;
+
+opacity:0;
+
+background:
+
+linear-gradient(
+180deg,
+rgba(240,240,240,.18),
+rgba(220,220,220,.08)
+);
+
+backdrop-filter:
+blur(18px);
+
+transition:
+opacity 1s ease;
+
+z-index:-2;
 }
 
-button:hover {
-  background: rgba(255,255,255,0.3);
+/* =====================================================
+   CHUVA
+===================================================== */
+
+.rain-layer{
+
+position:fixed;
+inset:0;
+
+overflow:hidden;
+
+pointer-events:none;
+
+z-index:-1;
 }
 
-/* ================= RADAR ================= */
+.drop{
 
-#mapaRadar {
-  width: 100%;
-  height: 320px;
-  border: none;
-  border-radius: 18px;
-  margin: 10px 0;
+position:absolute;
+
+border-radius:10px;
+
+background:
+linear-gradient(
+to bottom,
+rgba(255,255,255,0),
+rgba(255,255,255,.7)
+);
+
+animation:
+rainFall linear infinite;
 }
 
-/* ================= PREVISÃO ================= */
+@keyframes rainFall{
 
-.previsao h2 {
-  margin-bottom: 10px;
+from{
+transform:
+translateY(-120px);
 }
 
-#previsao12h {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 2fr));
-  gap: 10px;
+to{
+transform:
+translateY(120vh);
 }
 
-/* CARDS DE PREVISÃO */
-.previsao-card {
-  background: rgba(255,255,255,0.08);
-  backdrop-filter: blur(16px);
-  border-radius: 16px;
-  padding: 12px;
-  text-align: center;
 }
 
-.previsao-card .hora {
-  font-size: 0.8rem;
-  opacity: 0.7;
+/* =====================================================
+   RAIOS
+===================================================== */
+
+.lightning{
+
+position:fixed;
+inset:0;
+
+background:white;
+
+opacity:0;
+
+pointer-events:none;
+
+z-index:999;
+
+transition:
+opacity .1s linear;
 }
 
-.previsao-card .temp {
-  font-size: 1.3rem;
-}
-/* ================= BOTÃO IPMET ================= */
+/* =====================================================
+   TOPO
+===================================================== */
 
-.btn-ipmet {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.topo{
 
-  width: 250px;
-  min-height: 36px;
+width:min(950px,100%);
 
-  padding: 12px;
-  border-radius: 14px;
-  margin-top: 1px;
-  margin-bottom: 12px;
+text-align:center;
 
-  background: linear-gradient(
-    135deg,
-    rgba(255,255,255,0.15),
-    rgba(255,255,255,0.05)
-  );
+padding-top:10px;
+padding-bottom:10px;
 
-  border: 1px solid rgba(255,255,255,0.15);
-
-  color: white;
-  font-weight: 500;
-
-  text-decoration: none; /* remove sublinhado */
-  box-shadow: 0 8px 25px rgba(0,0,0,0.25);
-  transition: all 0.2s ease;
+z-index:10;
 }
 
-.btn-ipmet:hover {
-  background: rgba(255,255,255,0.25);
-  transform: translateY(-1px);
+.topo h1{
+
+font-size:2rem;
+
+font-weight:600;
+
+letter-spacing:.2px;
+}
+
+/* =====================================================
+   CARDS IOS
+===================================================== */
+
+.resumo-clima,
+.previsao-card,
+.item,
+input,
+button,
+#mapaRadar{
+
+background:
+linear-gradient(
+180deg,
+rgba(255,255,255,.18),
+rgba(255,255,255,.06)
+);
+
+backdrop-filter:
+blur(24px)
+saturate(180%);
+
+-webkit-backdrop-filter:
+blur(24px)
+saturate(180%);
+
+border:
+1px solid rgba(255,255,255,.12);
+
+box-shadow:
+
+0 1px 1px rgba(255,255,255,.08) inset,
+
+0 10px 40px rgba(0,0,0,.18),
+
+0 4px 12px rgba(0,0,0,.10);
+}
+
+/* =====================================================
+   RESUMO
+===================================================== */
+
+.resumo-clima{
+
+width:min(950px,100%);
+
+padding:24px;
+
+border-radius:32px;
+
+margin-bottom:16px;
+
+z-index:10;
+}
+
+.cidade{
+
+font-size:1rem;
+
+opacity:.88;
+}
+
+.temperatura-principal{
+
+font-size:88px;
+
+font-weight:200;
+
+line-height:1;
+}
+
+.status{
+
+margin-top:4px;
+
+font-size:1rem;
+font-weight:600;
+}
+
+.descricao{
+
+margin-top:8px;
+
+opacity:.85;
+}
+
+.dados-resumo{
+
+display:grid;
+
+grid-template-columns:
+repeat(3,1fr);
+
+gap:14px;
+
+margin-top:18px;
+}
+
+.item{
+
+padding:18px;
+
+border-radius:22px;
+
+text-align:center;
+}
+
+.item span{
+
+display:block;
+
+font-size:.82rem;
+
+opacity:.7;
+
+margin-top:5px;
+}
+
+.item strong{
+
+display:block;
+
+margin-top:6px;
+
+font-size:1.1rem;
+}
+
+/* =====================================================
+   RADAR
+===================================================== */
+
+.radar{
+
+width:min(950px,100%);
+
+margin-bottom:16px;
+
+z-index:10;
+}
+
+#mapaRadar{
+
+width:100%;
+height:350px;
+
+border:none;
+
+border-radius:28px;
+}
+
+/* =====================================================
+   BOTÃO IPMET
+===================================================== */
+
+.btn-ipmet{
+
+display:flex;
+
+justify-content:center;
+align-items:center;
+
+margin:12px auto 0;
+
+width:250px;
+height:44px;
+
+border-radius:16px;
+
+text-decoration:none;
+
+font-weight:600;
+
+color:white;
+
+background:
+rgba(255,255,255,.15);
+
+border:
+1px solid rgba(255,255,255,.12);
+
+transition:.25s;
+}
+
+.btn-ipmet:hover{
+
+transform:
+translateY(-2px);
+
+background:
+rgba(255,255,255,.25);
+}
+
+/* =====================================================
+   CONTROLES
+===================================================== */
+
+.controles{
+
+width:min(950px,100%);
+
+display:grid;
+
+gap:12px;
+
+margin-bottom:18px;
+
+z-index:10;
+}
+
+input{
+
+width:100%;
+
+padding:16px;
+
+border-radius:18px;
+
+color:white;
+
+font-size:1rem;
+
+outline:none;
+}
+
+input::placeholder{
+color:rgba(255,255,255,.6);
+}
+
+button{
+
+padding:14px;
+
+border-radius:18px;
+
+color:white;
+
+font-size:1rem;
+
+cursor:pointer;
+
+transition:.2s;
+}
+
+button:hover{
+
+background:
+rgba(255,255,255,.20);
+}
+
+/* =====================================================
+   PREVISÃO 12 HORAS
+===================================================== */
+
+.previsao{
+
+width:min(950px,100%);
+
+z-index:10;
+}
+
+.previsao h2{
+
+margin-bottom:14px;
+
+font-weight:500;
+}
+
+#previsao12h{
+
+display:grid;
+
+grid-template-columns:
+repeat(auto-fit,minmax(105px,1fr));
+
+gap:12px;
+}
+
+.previsao-card{
+
+padding:14px;
+
+border-radius:24px;
+
+text-align:center;
+
+transition:.25s;
+}
+
+.previsao-card:hover{
+
+transform:
+translateY(-3px);
+}
+
+.previsao-card .hora{
+
+font-size:.85rem;
+
+opacity:.7;
+
+margin-bottom:6px;
+}
+
+.previsao-card .icone{
+
+font-size:1.6rem;
+
+margin-bottom:6px;
+}
+
+.previsao-card .temp{
+
+font-size:1.25rem;
+
+font-weight:600;
+}
+
+.previsao-card .chuva{
+
+font-size:.8rem;
+
+opacity:.75;
+
+margin-top:4px;
+}
+
+/* =====================================================
+   RODAPÉ
+===================================================== */
+
+footer{
+
+margin-top:25px;
+
+margin-bottom:20px;
+
+font-size:.85rem;
+
+opacity:.7;
+
+text-align:center;
+
+z-index:10;
+}
+
+/* =====================================================
+   MOBILE
+===================================================== */
+
+@media (max-width:700px){
+
+.temperatura-principal{
+
+font-size:72px;
+}
+
+.dados-resumo{
+
+grid-template-columns:1fr;
+}
+
+#mapaRadar{
+
+height:280px;
+}
+
 }

@@ -322,12 +322,13 @@ function atualizarEstrelas() {
 
     if (ehDia) {
         stars.style.opacity = 0;
+		document.body.style.color = "#0b1220";
         return;
     }
     const cloud = (climaAtual.cloudCover || 0) / 100;
 
-    stars.style.opacity =
-        Math.max(0.15, 1 - cloud);
+    stars.style.opacity = Math.max(0.15, 1 - cloud);
+	document.body.style.color = "#fff";
 }
 
 /* =====================================================

@@ -43,36 +43,74 @@ function iniciarGPS() {
         "Buscando localização...";
     if (!navigator.geolocation) {
         $("cidadeAtual").textContent =
-            "GPS não suportado";
+            "GPS não suportado. Busque manualmente";
         return;
     }
-
     navigator.geolocation.getCurrentPosition(
-        pos => {
+        async pos => {
             LAT = pos.coords.latitude;
             LON = pos.coords.longitude;
-            atualizarClima();
+            console.log("LAT:", LAT);
+            console.log("LON:", LON);
+			
+            await atualizarNomeCidade();
+            await atualizarClima();
         },
-        () => {
-            $("cidadeAtual").textContent = "Permissão negada";
+        erro => {
+            console.error("Erro GPS:", erro);
+            $("cidadeAtual").textContent =
+                "Permissão negada";
         },
         {
             enableHighAccuracy: true,
-            timeout: 10000
+            timeout: 10000,
+            maximumAge: 0
         }
     );
+}
+
+async function atualizarNomeCidade() {
+    try {
+        const url =`https://geocoding-api.open-meteo.com/v1/reverse?latitude=${LAT}&longitude=${LON}&language=pt`;
+
+        const resposta = await fetch(url);
+
+        if (!resposta.ok) {
+            throw new Error(`Erro HTTP ${resposta.status}`);
+        }
+        const dados = await resposta.json();
+        console.log("Reverse Geocoding:", dados);
+		
+        if (dados.results && dados.results.length > 0 ) {
+            const local = dados.results[0];
+            const cidade = local.name || "";
+            const estado = local.admin1 || "";
+            const pais = local.country || "";
+
+            $("cidadeAtual").textContent = [cidade, estado].filter(Boolean).join(", ");
+        }
+        else {
+            $("cidadeAtual").textContent = `${LAT.toFixed(2)}, ${LON.toFixed(2)}`;
+        }
+    }
+    catch (erro) {
+        console.error("Erro ao obter cidade:", erro);
+        $("cidadeAtual").textContent = `${LAT.toFixed(2)}, ${LON.toFixed(2)}`;
+    }
 }
 
 /* =====================================================
    OPEN METEO
 ===================================================== */
-async function atualizarClima() {
+async function atualizarClima() { 
     if (LAT === null || LON === null)
         return;
     try {
-        const url = `https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&current=temperature_2m,apparent_temperature,precipitation,precipitation_probability,wind_speed_10m,relative_humidity_2m,cloud_cover,weather_code&hourly=temperature_2m,precipitation_probability,precipitation,weather_code,cloud_cover&daily=sunrise,sunset&timezone=auto`;
-		const resposta = await fetch(url);
+        const url = `https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&current=temperature_2m,apparent_temperature,precipitation,wind_speed_10m,relative_humidity_2m,cloud_cover,weather_code&hourly=temperature_2m,precipitation_probability,precipitation,weather_code,cloud_cover&daily=sunrise,sunset&timezone=auto`;		
+        const resposta = await fetch(url);
         const dados = await resposta.json();
+			console.log("URL:", url);
+			console.log("Resposta Raw:", dados);
 
         timezoneAtual = dados.timezone;
         climaAtual.temperatura = dados.current.temperature_2m;
@@ -87,7 +125,7 @@ async function atualizarClima() {
         climaAtual.sunset = dados.daily.sunset[0];
         climaAtual.horarioLocal = dados.current.time;
 
-        atualizarInterface();
+		atualizarInterface();
         atualizarMapa();
         renderizar12Horas(dados.hourly);
         atualizarCeu();
@@ -95,6 +133,7 @@ async function atualizarClima() {
         atualizarNuvens();
         atualizarChuva();
         atualizarNeblina();
+        atualizarEstrelas();
         atualizarViaLactea();
     }
     catch (erro) {
@@ -126,6 +165,20 @@ function atualizarInterface() {
 }
 
 /* =====================================================
+   ATUALIZAR DESCRIÇÃO
+===================================================== */
+function atualizarDescricao(h) {
+
+  for (let i = 0; i < 6; i++) {
+    if ((h.precipitation_probability[i] || 0) > 60) {
+      el("descricaoAtual").textContent = `🌧️ Chuva em ${i + 1}h`;
+      return;
+    }
+  }
+  el("descricaoAtual").textContent = "Sem chuva nas próximas horas";
+}
+
+/* =====================================================
    RADAR
 ===================================================== */
 function atualizarMapa() {
@@ -150,6 +203,7 @@ async function buscarCidade() {
 
     $("cidadeAtual").textContent = dados.results[0].name;
     atualizarClima();
+    atualizarEstrelas();
 }
 
 function usarGPS() {
@@ -232,7 +286,7 @@ let estrelasCriadas = false;
 function gerarEstrelas() {
     const layer = $("stars");
     layer.innerHTML = "";
-    const total = 2000;
+    const total = 400;
 
     for (let i = 0; i < total; i++) {
         const star = document.createElement("div");
@@ -240,41 +294,40 @@ function gerarEstrelas() {
         star.style.left = Math.random() * 100 + "vw";
         star.style.top = Math.random() * 100 + "vh";
 
-        const size = Math.random() * 1.7 + 0.25;
+        const size = Math.random() * 2.5 + 0.25;
         star.style.width = size + "px";
         star.style.height = size + "px";
         star.style.animationDuration = (1 + Math.random() * 4) + "s";
-        star.style.opacity = Math.random();
+        star.style.opacity = 0.3 + Math.random() * 0.7;
         layer.appendChild(star);
     }
     estrelasCriadas = true;
 }
 
 function atualizarEstrelas() {
+    
     if (!estrelasCriadas)
         gerarEstrelas();
     const stars = $("stars");
-    const now = obterHoraCidade().getTime();
-    const sunrise = new Date(climaAtual.sunrise).getTime();
-    const sunset = new Date(climaAtual.sunset).getTime();
-    const cloud = climaAtual.cloudCover / 100;
-    const transicao = 45 * 60 * 1000;
+    if (!climaAtual.sunrise || !climaAtual.sunset) {
+        stars.style.opacity = 0;
+        return;
+    }
 
-    let opacity = 0;
-    if (now < sunrise - transicao) {
-        opacity = 1;
+    const agora = obterHoraCidade().getTime();
+    const nascer = new Date(climaAtual.sunrise).getTime();
+    const por = new Date(climaAtual.sunset).getTime();
+
+    const ehDia = agora >= nascer && agora <= por;
+
+    if (ehDia) {
+        stars.style.opacity = 0;
+        return;
     }
-    else if (now < sunrise) {
-        opacity = 1 - ((now - (sunrise - transicao)) / transicao);
-    }
-    else if (now > sunset + transicao) {
-        opacity = 1;
-    }
-    else if (now > sunset) {
-        opacity = (now - sunset)/ transicao;
-    }
-    opacity *= (1 - cloud);
-    stars.style.opacity = opacity;
+    const cloud = (climaAtual.cloudCover || 0) / 100;
+
+    stars.style.opacity =
+        Math.max(0.15, 1 - cloud);
 }
 
 /* =====================================================
@@ -318,11 +371,18 @@ function criarEstrelaCadente() {
 }
 
 setInterval(() => {
-    const chance = Math.random();
-    if (chance < 0.12) {
-        criarEstrelaCadente();
+    const hora = obterHoraCidade().getHours();
+    if (hora >= 6 && hora < 18)
+        return;
+    const quantidade =
+        Math.floor(Math.random() * 3) + 1;
+    for (let i = 0; i < quantidade; i++) {
+        setTimeout(() => {
+            criarEstrelaCadente();
+        }, Math.random() * 15000); // cada 15 segundos
     }
-}, 60000);
+
+}, 20000);
 
 /* =====================================================
    LOOP VISUAL
@@ -332,7 +392,7 @@ setInterval(() => {
     atualizarSolLua();
     atualizarEstrelas();
     atualizarViaLactea();
-}, 30000);
+}, 60000); // 1 min
 
 /* =====================================================
    NUVENS
@@ -384,7 +444,7 @@ function atualizarChuva() {
         return;
     }
 
-    const quantidade = Math.min(250, Math.max(30, climaAtual.probabilidade * 2));
+    const quantidade = Math.min(125, Math.max(24, climaAtual.probabilidade));
 
     for (let i = 0; i < quantidade; i++) {
         const drop = document.createElement("div");
@@ -430,7 +490,7 @@ function iniciarRelampagos() {
         if (Math.random() > 0.22)
             return;
         relampago();
-    }, 15000);
+    }, 15000); // 15 segundos
 }
 
 function relampago() {
@@ -548,7 +608,7 @@ setInterval(() => {
 setInterval(() => {
     atualizarEstrelas();
     atualizarViaLactea();
-}, 60000);
+}, 60000); // 1 min
 
 /* =====================================================
    INICIALIZAÇÃO
@@ -556,6 +616,7 @@ setInterval(() => {
 
 function iniciarSistema() {
     gerarEstrelas();
+    atualizarEstrelas();
     iniciarRelampagos();
     iniciarGPS();
 }

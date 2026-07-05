@@ -322,7 +322,7 @@ function atualizarEstrelas() {
 
     if (ehDia) {
         stars.style.opacity = 0;
-		document.body.style.color = "#0b1220";
+		document.body.style.color = "#10438f";
         return;
     }
     const cloud = (climaAtual.cloudCover || 0) / 100;

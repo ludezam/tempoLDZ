@@ -23,7 +23,8 @@ let climaAtual = {
     weatherCode: 0,
     sunrise: null,
     sunset: null,
-    horarioLocal: null
+    horarioLocal: null,
+    proximaChuva: false
 };
 
 /* =====================================================
@@ -38,6 +39,39 @@ function obterHoraCidade() {
 /* =====================================================
    GEOLOCALIZAÇÃO
 ===================================================== */
+async function atualizarNomeCidade() {
+    console.log("🔍 Iniciando atualizarNomeCidade com LAT:", LAT, "LON:", LON);
+    try {
+        const url = `https://geocoding-api.open-meteo.com/v1/reverse?latitude=${LAT}&longitude=${LON}&language=pt`;
+        console.log("📍 URL de reverse geocoding:", url);
+
+        const resposta = await fetch(url);
+        
+        if (!resposta.ok) {
+            console.error("❌ Erro HTTP:", resposta.status);
+            throw new Error(`Erro HTTP ${resposta.status}`);
+        }
+        const dados = await resposta.json();
+        console.log("✅ Reverse Geocoding OK:", dados);
+        
+        if (dados.results && dados.results.length > 0) {
+            const local = dados.results[0];
+            const cidade = local.name || "";
+            const estado = local.admin1 || "";
+            
+            console.log("🏙️ Cidade encontrada:", cidade, estado);
+            $("cidadeAtual").textContent = [cidade, estado].filter(Boolean).join(", ");
+        } else {
+            console.warn("⚠️ Nenhum resultado de geocoding");
+            $("cidadeAtual").textContent = `${LAT.toFixed(2)}, ${LON.toFixed(2)}`;
+        }
+    }
+    catch (erro) {
+        console.error("❌ Erro ao obter cidade:", erro);
+        $("cidadeAtual").textContent = `${LAT.toFixed(2)}, ${LON.toFixed(2)}`;
+    }
+}
+
 function iniciarGPS() {
     $("cidadeAtual").textContent =
         "Buscando localização...";
@@ -67,36 +101,6 @@ function iniciarGPS() {
             maximumAge: 0
         }
     );
-}
-
-async function atualizarNomeCidade() {
-    try {
-        const url =`https://geocoding-api.open-meteo.com/v1/reverse?latitude=${LAT}&longitude=${LON}&language=pt`;
-
-        const resposta = await fetch(url);
-
-        if (!resposta.ok) {
-            throw new Error(`Erro HTTP ${resposta.status}`);
-        }
-        const dados = await resposta.json();
-        console.log("Reverse Geocoding:", dados);
-		
-        if (dados.results && dados.results.length > 0 ) {
-            const local = dados.results[0];
-            const cidade = local.name || "";
-            const estado = local.admin1 || "";
-            const pais = local.country || "";
-
-            $("cidadeAtual").textContent = [cidade, estado].filter(Boolean).join(", ");
-        }
-        else {
-            $("cidadeAtual").textContent = `${LAT.toFixed(2)}, ${LON.toFixed(2)}`;
-        }
-    }
-    catch (erro) {
-        console.error("Erro ao obter cidade:", erro);
-        $("cidadeAtual").textContent = `${LAT.toFixed(2)}, ${LON.toFixed(2)}`;
-    }
 }
 
 /* =====================================================
@@ -154,11 +158,14 @@ function atualizarInterface() {
     $("sunset").textContent = climaAtual.sunset.slice(11,16);
     $("horaLocal").textContent = climaAtual.horarioLocal.slice(11,16);
 
-    if (climaAtual.chuva > 5) {
+    if (climaAtual.chuva > 0.5) {
         $("statusChuva").textContent = "🔴 Chuva Forte";
     }
-    else if (climaAtual.probabilidade > 60) {
+    else if (climaAtual.probabilidade > 40) {
         $("statusChuva").textContent = "🟡 Chuva Chegando";
+    }
+    else if (climaAtual.proximaChuva) {
+        $("statusChuva").textContent = "🟡 Chuva nas próximas horas";
     }
     else {
         $("statusChuva").textContent = "🟢 Tempo Estável";
@@ -170,8 +177,9 @@ function atualizarInterface() {
 ===================================================== */
 function atualizarDescricao(h) {
     for (let i = 0; i < 6; i++) {
-        if ((h.precipitation_probability[i] || 0) > 60) {
-            $('descricaoAtual').textContent = "🌧️ Chuva em ${i + 1}h";
+        if ((h.precipitation_probability[i] || 0) > 30) {
+            $('descricaoAtual').textContent = `🌧️ Chuva em ${i + 1}h`;
+            climaAtual.proximaChuva = true;
         return;
         }
     }

@@ -128,6 +128,7 @@ async function atualizarClima() {
 		atualizarInterface();
         atualizarMapa();
         renderizar12Horas(dados.hourly);
+        atualizarDescricao(dados.hourly);
         atualizarCeu();
         atualizarSolLua();
         atualizarNuvens();

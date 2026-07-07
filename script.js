@@ -171,25 +171,13 @@ function atualizarInterface() {
 function atualizarDescricao(h) {
     for (let i = 0; i < 6; i++) {
         if ((h.precipitation_probability[i] || 0) > 60) {
-            $(“descricaoAtual”).textContent = 🌧️ Chuva em ${i + 1}h;
+            $('descricaoAtual').textContent = "🌧️ Chuva em ${i + 1}h";
         return;
         }
     }
-    $(“descricaoAtual”).textContent = “Sem chuva nas próximas horas”;
+    $('descricaoAtual').textContent = "Sem chuva nas próximas horas";
 }
 
-/*
-function atualizarDescricao(h) {
-
-  for (let i = 0; i < 6; i++) {
-    if ((h.precipitation_probability[i] || 0) > 60) {
-      el("descricaoAtual").textContent = `🌧️ Chuva em ${i + 1}h`;
-      return;
-    }
-  }
-  el("descricaoAtual").textContent = "Sem chuva nas próximas horas";
-}
-*/
 /* =====================================================
    RADAR
 ===================================================== */
@@ -353,8 +341,8 @@ function atualizarViaLactea() {
     const cloud = climaAtual.cloudCover;
 
     if (
-        (hora >= 21 || hora <= 4) && cloud < 10) {
-        milky.style.opacity = 0.35;
+        (hora >= 20 || hora <= 4) && cloud < 10) {
+        milky.style.opacity = 0.5;
     }
     else {
         milky.style.opacity = 0;
@@ -608,7 +596,7 @@ function renderizar12Horas(hourly) {
 
 $("btnBuscar").addEventListener("click", buscarCidade);
 $("btnGPS").addEventListener("click", usarGPS);
-$(“btnRefresh”).addEventListener(“click”, () => { window.location.reload(); });
+$('btnRefresh').addEventListener('click', () => { window.location.reload(); });
 
 /* =====================================================
    LOOPS

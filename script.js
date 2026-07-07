@@ -596,7 +596,7 @@ function renderizar12Horas(hourly) {
 
 $("btnBuscar").addEventListener("click", buscarCidade);
 $("btnGPS").addEventListener("click", usarGPS);
-$("btnRefresh").addEventListener("click", window.location.reload());
+$(“btnRefresh”).addEventListener(“click”, () => { window.location.reload(); });
 
 /* =====================================================
    LOOPS

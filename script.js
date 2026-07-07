@@ -169,6 +169,17 @@ function atualizarInterface() {
    ATUALIZAR DESCRIÇÃO
 ===================================================== */
 function atualizarDescricao(h) {
+    for (let i = 0; i < 6; i++) {
+        if ((h.precipitation_probability[i] || 0) > 60) {
+            $(“descricaoAtual”).textContent = 🌧️ Chuva em ${i + 1}h;
+        return;
+        }
+    }
+    $(“descricaoAtual”).textContent = “Sem chuva nas próximas horas”;
+}
+
+/*
+function atualizarDescricao(h) {
 
   for (let i = 0; i < 6; i++) {
     if ((h.precipitation_probability[i] || 0) > 60) {
@@ -178,7 +189,7 @@ function atualizarDescricao(h) {
   }
   el("descricaoAtual").textContent = "Sem chuva nas próximas horas";
 }
-
+*/
 /* =====================================================
    RADAR
 ===================================================== */

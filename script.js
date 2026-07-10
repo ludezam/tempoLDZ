@@ -551,17 +551,49 @@ function criarNuvem(layer, frontal) {
 }
 
 /* =====================================================
-   CHUVA
+   CHUVA (MAIS SENSÍVEL E INTENSA)
 ===================================================== */
 function atualizarChuva() {
     const rain = $("rain");
     rain.innerHTML = "";
 
-    if (climaAtual.chuva <= 0 && climaAtual.probabilidade < 40) {
-        return;
+    // Verifica se há chuva:
+    // 1. Se precipitation > 0 (chovendo agora)
+    // 2. OU se precipitation_probability > 15% (alta chance)
+    // 3. OU se weather code indica chuva/tempestade
+    const temChuvaAgora = climaAtual.chuva > 0;
+    const altaProbabilidade = climaAtual.probabilidade > 15;
+    const ehChuvaCodigo = [
+        51, 53, 55, 56, 57,  // Garoa
+        61, 63, 65, 66, 67,  // Chuva
+        80, 81, 82,          // Chuva por pancada
+        95, 96, 99           // Tempestade
+    ].includes(climaAtual.weatherCode);
+
+    if (!temChuvaAgora && !altaProbabilidade && !ehChuvaCodigo) {
+        return;  // Nenhuma chuva esperada
     }
 
-    const quantidade = Math.min(125, Math.max(24, climaAtual.probabilidade));
+    // Calcula quantidade de gotas com base em:
+    // - Precipitação atual (mais forte = mais gotas)
+    // - Probabilidade
+    // - Weather code
+    let quantidade = 0;
+    
+    if (temChuvaAgora) {
+        // Se está chovendo, quantidade baseada na precipitação em mm
+        // 1mm = ~80 gotas, 2mm = ~150, 5mm = ~250
+        quantidade = Math.min(300, Math.max(100, climaAtual.chuva * 60));
+    } else if (altaProbabilidade) {
+        // Se há alta probabilidade, escala com a probabilidade
+        // 15% = 60 gotas, 50% = 200 gotas, 100% = 300 gotas
+        quantidade = Math.min(300, Math.max(60, climaAtual.probabilidade * 4));
+    } else if (ehChuvaCodigo) {
+        // Se é um código de chuva mas sem probabilidade/precipitação clara
+        quantidade = Math.min(250, Math.max(120, climaAtual.probabilidade * 3 + 80));
+    }
+
+    console.log(`🌧️ Chuva renderizada: ${Math.round(quantidade)} gotas (chuva: ${climaAtual.chuva}mm, prob: ${climaAtual.probabilidade}%, código: ${climaAtual.weatherCode})`);
 
     for (let i = 0; i < quantidade; i++) {
         const drop = document.createElement("div");

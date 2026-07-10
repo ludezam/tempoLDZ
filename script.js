@@ -195,6 +195,18 @@ function atualizarInterface() {
     $("sunset").textContent = climaAtual.sunset.slice(11,16);
     $("horaLocal").textContent = climaAtual.horarioLocal.slice(11,16);
 
+    // Atualizar info de precipitação em tempo real
+    const infoChuva = $("infoChuvaAtual");
+    if (climaAtual.chuva > 0) {
+        infoChuva.innerHTML = `💧 <strong>${climaAtual.chuva.toFixed(1)}mm</strong> de chuva`;
+        infoChuva.style.display = "block";
+    } else if (climaAtual.probabilidade > 0) {
+        infoChuva.innerHTML = `💧 ${climaAtual.probabilidade}% de probabilidade`;
+        infoChuva.style.display = "block";
+    } else {
+        infoChuva.style.display = "none";
+    }
+
     if (climaAtual.chuva > 0.5) {
         $("statusChuva").textContent = "🔴 Chuva Forte";
     }
@@ -210,23 +222,35 @@ function atualizarInterface() {
 }
 
 /* =====================================================
-   ATUALIZAR DESCRIÇÃO (MAIS SENSÍVEL)
+   ATUALIZAR DESCRIÇÃO (COM PREVISÃO DE CHUVA)
 ===================================================== */
 function atualizarDescricao(h) {
-    // Verifica próximas 12 horas com limite menor (20% probabilidade)
-    // Também considera a quantidade de precipitação (> 0.5mm)
+    // Calcula precipitação e probabilidade para as próximas 12 horas
+    let chuvaTotal = 0;
+    let horasComChuva = 0;
+    let primeiraHoraComChuva = -1;
+    
     for (let i = 0; i < 12; i++) {
         const prob = (h.precipitation_probability[i] || 0);
         const amount = (h.precipitation[i] || 0);
         
         if (prob > 20 || amount > 0.5) {
-            $('descricaoAtual').textContent = `🌧️ Chuva em ${i + 1}h`;
-            climaAtual.proximaChuva = true;
-            return;
+            chuvaTotal += amount;
+            horasComChuva++;
+            if (primeiraHoraComChuva === -1) {
+                primeiraHoraComChuva = i;
+            }
         }
     }
-    $('descricaoAtual').textContent = "Sem chuva nas próximas horas";
-    climaAtual.proximaChuva = false;
+
+    // Exibir descrição baseada na previsão
+    if (primeiraHoraComChuva >= 0 && horasComChuva > 0) {
+        $('descricaoAtual').textContent = `🌧️ Chuva de ${chuvaTotal.toFixed(1)}mm nas próximas ${horasComChuva}h`;
+        climaAtual.proximaChuva = true;
+    } else {
+        $('descricaoAtual').textContent = "Sem chuva nas próximas horas";
+        climaAtual.proximaChuva = false;
+    }
 }
 
 /* =====================================================
@@ -691,7 +715,7 @@ function obterIcone(codigo) {
 }
 
 /* =====================================================
-   PREVISÃO 12H
+   PREVISÃO 12H (COM DADOS DE PRECIPITAÇÃO)
 ===================================================== */
 function renderizar12Horas(hourly) {
     const container = $("previsao12h");
@@ -709,8 +733,17 @@ function renderizar12Horas(hourly) {
         if (!hora) continue;
         const temp = Math.round(hourly.temperature_2m[i]);
         const prob = hourly.precipitation_probability[i];
+        const precip = hourly.precipitation[i] || 0;
         const codigo = hourly.weather_code[i];
         const icone = obterIcone(codigo);
+
+        // Formatar informação de chuva
+        let infoChuvaCard = "";
+        if (precip > 0) {
+            infoChuvaCard = `${precip.toFixed(1)}mm - ${prob}%`;
+        } else {
+            infoChuvaCard = `${prob}%`;
+        }
 
         html += `
         <div class="previsao-card">
@@ -728,7 +761,7 @@ function renderizar12Horas(hourly) {
             </div>
 
             <div class="chuva">
-                ${prob}% chuva
+                💧 ${infoChuvaCard}
             </div>
 
         </div>

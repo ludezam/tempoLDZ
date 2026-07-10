@@ -37,6 +37,43 @@ function obterHoraCidade() {
 }
 
 /* =====================================================
+   CALCULA POSIÇÃO NO CICLO DIA/NOITE
+===================================================== */
+function calcularPosicaoDiaNoite() {
+    const agora = obterHoraCidade().getTime();
+    const nascer = new Date(climaAtual.sunrise).getTime();
+    const por = new Date(climaAtual.sunset).getTime();
+    
+    if (agora >= nascer && agora <= por) {
+        // Durante o dia: calcula progresso de 0 a 1
+        return {
+            ehDia: true,
+            progresso: (agora - nascer) / (por - nascer),
+            tempoAtual: agora,
+            nascer: nascer,
+            por: por
+        };
+    } else {
+        // Durante a noite: calcula progresso de 0 a 1
+        let inicioNoite = por;
+        let fimNoite = nascer + 86400000; // próximo nascer
+        
+        if (agora < nascer) {
+            inicioNoite = por - 86400000; // pôr anterior
+            fimNoite = nascer;
+        }
+        
+        return {
+            ehDia: false,
+            progresso: (agora - inicioNoite) / (fimNoite - inicioNoite),
+            tempoAtual: agora,
+            nascer: nascer,
+            por: por
+        };
+    }
+}
+
+/* =====================================================
    GEOLOCALIZAÇÃO
 ===================================================== */
 async function atualizarNomeCidade() {
@@ -104,17 +141,17 @@ function iniciarGPS() {
 }
 
 /* =====================================================
-   OPEN METEO
+    OPEN METEO
 ===================================================== */
 async function atualizarClima() { 
     if (LAT === null || LON === null)
         return;
     try {
-        const url = `https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&current=temperature_2m,apparent_temperature,precipitation,wind_speed_10m,relative_humidity_2m,cloud_cover,weather_code&hourly=temperature_2m,precipitation_probability,precipitation,weather_code,cloud_cover&daily=sunrise,sunset&timezone=auto`;		
+        const url = `https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&current=temperature_2m,apparent_temperature,precipitation,wind_speed_10m,relative_humidity_2m,cloud_cover,weather_code&daily=sunrise,sunset&hourly=temperature_2m,precipitation_probability,weather_code&timezone=auto`;
         const resposta = await fetch(url);
         const dados = await resposta.json();
-			console.log("URL:", url);
-			console.log("Resposta Raw:", dados);
+		console.log("URL:", url);
+		console.log("Resposta Raw:", dados);
 
         timezoneAtual = dados.timezone;
         climaAtual.temperatura = dados.current.temperature_2m;
@@ -217,31 +254,101 @@ async function buscarCidade() {
 function usarGPS() {
     iniciarGPS();
 }
+
 /* =====================================================
-   CÉU DINÂMICO
+   CÉU DINÂMICO - BASEADO EM NASCER/PÔR DO SOL
 ===================================================== */
 function atualizarCeu() {
     const sky = document.getElementById("sky");
-    const agora = obterHoraCidade();
-    const hora = agora.getHours() + (agora.getMinutes() / 60);
+    const ciclo = calcularPosicaoDiaNoite();
     let gradiente = "";
+    const p = ciclo.progresso;
+    const nuvens = climaAtual.cloudCover / 100;
 
-    if (hora >= 5 && hora < 7) {
-        gradiente = `linear-gradient(180deg, #ff8030 0%, #ffc26f 35%, #8ddcff 100%)`;
+    if (ciclo.ehDia) {
+        // ☀️ CICLO DIURNO (0 = nascer, 1 = pôr)
+        
+        if (p < 0.15) {
+            // 🌅 Amanhecer (0-15% do dia)
+            const t = p / 0.15;
+            gradiente = `linear-gradient(180deg, 
+                #ff6b35 ${0 + t * 30}%, 
+                #ffa500 ${30 + t * 20}%, 
+                #87ceeb ${50 + t * 30}%, 
+                #e0f6ff 100%)`;
+        }
+        else if (p < 0.35) {
+            // 🌤️ Manhã clara (15-35% do dia)
+            const t = (p - 0.15) / 0.2;
+            gradiente = `linear-gradient(180deg, 
+                #6dbfff ${0 + t * 10}%, 
+                #87ceeb ${10 + t * 20}%, 
+                #bce7ff ${30 + t * 10}%, 
+                #e0f6ff 100%)`;
+        }
+        else if (p < 0.65) {
+            // ☀️ Meio do dia (35-65% do dia)
+            gradiente = `linear-gradient(180deg, 
+                #4ea5ff 0%, 
+                #87ceeb 30%, 
+                #82d4ff 70%, 
+                #b0e0e6 100%)`;
+        }
+        else if (p < 0.85) {
+            // 🌇 Transição para entardecer (65-85% do dia)
+            const t = (p - 0.65) / 0.2;
+            gradiente = `linear-gradient(180deg, 
+                #ff8c42 ${0 + t * 20}%, 
+                #ff9d5c ${20 + t * 20}%, 
+                #ffa500 ${40 + t * 20}%, 
+                #3f6ed7 ${60 + t * 20}%, 
+                #1a3a52 100%)`;
+        }
+        else {
+            // 🌅 Pôr do sol (85-100% do dia)
+            const t = (p - 0.85) / 0.15;
+            gradiente = `linear-gradient(180deg, 
+                #ff4500 ${0 + t * 10}%, 
+                #ff6b5b ${10 + t * 15}%, 
+                #ff8c69 ${25 + t * 15}%, 
+                #ffa07a ${40 + t * 10}%, 
+                #8b6341 ${50 + t * 15}%, 
+                #2c1810 ${65 + t * 20}%, 
+                #020611 100%)`;
+        }
+    } else {
+        // 🌙 CICLO NOTURNO (0 = pôr, 1 = nascer)
+        
+        if (p < 0.1) {
+            // 🌆 Crepúsculo vespertino (0-10% da noite)
+            const t = p / 0.1;
+            gradiente = `linear-gradient(180deg, 
+                #4a235a ${0}%, 
+                #1a0033 ${30 + t * 20}%, 
+                #0a0015 ${60 + t * 20}%, 
+                #020611 100%)`;
+        }
+        else if (p < 0.9) {
+            // 🌙 Noite profunda (10-90% da noite)
+            gradiente = `linear-gradient(180deg, #020611 0%, #071028 100%)`;
+        }
+        else {
+            // 🌅 Crepúsculo matutino (90-100% da noite)
+            const t = (p - 0.9) / 0.1;
+            gradiente = `linear-gradient(180deg, 
+                #0a0015 ${0}%, 
+                #1a0033 ${20 - t * 10}%, 
+                #4a235a ${40 - t * 15}%, 
+                #ff4500 ${70 + t * 15}%, 
+                #ff6b5b ${85 + t * 10}%, 
+                #ffb366 100%)`;
+        }
     }
-    else if (hora >= 7 && hora < 12) {
-        gradiente = `linear-gradient(180deg, #6dbfff 0%, #bce7ff 100%)`;
-    }
-    else if (hora >= 12 && hora < 17) {
-        gradiente = `linear-gradient(180deg, #4ea5ff 0%, #82d4ff 100%)`;
-    }
-    else if (hora >= 17 && hora < 19) {
-        gradiente = `linear-gradient(180deg,#ff8a38 0%, #ffc061 30%, #3f6ed7 100%)`;
-    }
-    else {
-        gradiente = `linear-gradient(180deg,#020611 0%,#071028 100%)`;
-    }
+
+    // Aplicar efeito de nuvens ao gradiente
+    const brilho = 1 - (nuvens * 0.3);
     sky.style.background = gradiente;
+    sky.style.filter = `brightness(${brilho})`;
 }
 
 /* =====================================================
@@ -250,14 +357,12 @@ function atualizarCeu() {
 function atualizarSolLua() {
     const sun = document.querySelector(".sun");
     const moon = document.querySelector(".moon");
-    const agora = obterHoraCidade();
-    const now = agora.getTime();
-    const sunrise = new Date(climaAtual.sunrise).getTime();
-    const sunset = new Date(climaAtual.sunset).getTime();
+    const ciclo = calcularPosicaoDiaNoite();
     const cloudFactor = climaAtual.cloudCover / 100;
 
-    if (now >= sunrise && now <= sunset) {
-        const p = (now - sunrise) / (sunset - sunrise);
+    if (ciclo.ehDia) {
+        // Sol
+        const p = ciclo.progresso;
         const x = 5 + (p * 90);
         const y = 78 - (Math.sin(p * Math.PI) * 65);
 
@@ -268,20 +373,22 @@ function atualizarSolLua() {
         moon.style.opacity = 0;
     }
     else {
-        let moonStart = sunset;
-        let moonEnd = sunrise + 86400000;
+        // Lua
+        let moonStart = ciclo.por;
+        let moonEnd = ciclo.nascer + 86400000;
 
-        if (now < sunrise) {
-            moonStart = sunset - 86400000;
-            moonEnd = sunrise;
+        if (ciclo.tempoAtual < ciclo.nascer) {
+            moonStart = ciclo.por - 86400000;
+            moonEnd = ciclo.nascer;
         }
-        const p = (now - moonStart) / (moonEnd - moonStart);
+        
+        const p = (ciclo.tempoAtual - moonStart) / (moonEnd - moonStart);
         const x = 5 + (p * 90);
-
         const y = 78 - (Math.sin(p * Math.PI) * 65);
+        
         moon.style.left = x + "vw";
         moon.style.top = y + "vh";
-        moon.style.opacity = Math.max(0.15,0.85 - (cloudFactor * 0.6));
+        moon.style.opacity = Math.max(0.15, 0.85 - (cloudFactor * 0.6));
         sun.style.opacity = 0;
     }
 }
@@ -322,19 +429,15 @@ function atualizarEstrelas() {
         return;
     }
 
-    const agora = obterHoraCidade().getTime();
-    const nascer = new Date(climaAtual.sunrise).getTime();
-    const por = new Date(climaAtual.sunset).getTime();
+    const ciclo = calcularPosicaoDiaNoite();
+    const cloud = (climaAtual.cloudCover || 0) / 100;
 
-    const ehDia = agora >= nascer && agora <= por;
-
-    if (ehDia) {
+    if (ciclo.ehDia) {
         stars.style.opacity = 0;
 		document.body.style.color = "#10438f";
         return;
     }
-    const cloud = (climaAtual.cloudCover || 0) / 100;
-
+    
     stars.style.opacity = Math.max(0.15, 1 - cloud);
 	document.body.style.color = "#fff";
 }
@@ -344,12 +447,11 @@ function atualizarEstrelas() {
 ===================================================== */
 function atualizarViaLactea() {
     const milky = $("milkyway");
-
-    const hora = obterHoraCidade().getHours();
+    const ciclo = calcularPosicaoDiaNoite();
     const cloud = climaAtual.cloudCover;
 
-    if (
-        (hora >= 20 || hora <= 4) && cloud < 10) {
+    // Via láctea apenas à noite e com poucas nuvens
+    if (!ciclo.ehDia && cloud < 10) {
         milky.style.opacity = 0.5;
     }
     else {
@@ -364,9 +466,9 @@ function criarEstrelaCadente() {
 
     if (climaAtual.cloudCover > 25)
         return;
-    const hora = obterHoraCidade().getHours();
+    const ciclo = calcularPosicaoDiaNoite();
 
-    if (hora > 5 && hora < 19)
+    if (ciclo.ehDia)
         return;
     const meteor = document.createElement("div");
     meteor.className = "meteor";
@@ -380,8 +482,8 @@ function criarEstrelaCadente() {
 }
 
 setInterval(() => {
-    const hora = obterHoraCidade().getHours();
-    if (hora >= 6 && hora < 18)
+    const ciclo = calcularPosicaoDiaNoite();
+    if (ciclo.ehDia)
         return;
     const quantidade =
         Math.floor(Math.random() * 3) + 1;
@@ -401,7 +503,7 @@ setInterval(() => {
     atualizarSolLua();
     atualizarEstrelas();
     atualizarViaLactea();
-}, 60000); // 1 min
+}, 30000); // 30 seg
 
 /* =====================================================
    NUVENS

@@ -7,6 +7,14 @@
     <title> 🌤️ Tempo LDZ </title>
     <link rel="stylesheet" href="style.css">
     <script defer src="script.js"></script>
+    <style>
+        /* Cria um bloco invisível que pula da altura da tela */
+        .espaco-tela {
+            height: 100vh; 
+            width: 100vw;
+            background-color: transparent; /* Fica invisível */
+        }
+    </style>
 </head>
 
 <body>
@@ -113,6 +121,9 @@
                 🕒 <span>Hora da atualização</span> <strong id="horaLocal">--:--</strong>
             </div>
         </div>
+        
+    <div class="espaco-tela"> <p>Visualização</p> </div>
+    
     </section>
 
     <!-- RODAPÉ -->

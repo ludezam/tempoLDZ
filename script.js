@@ -141,13 +141,13 @@ function iniciarGPS() {
 }
 
 /* =====================================================
-    OPEN METEO
+     OPEN METEO
 ===================================================== */
 async function atualizarClima() { 
     if (LAT === null || LON === null)
         return;
     try {
-        const url = `https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&current=temperature_2m,apparent_temperature,precipitation,wind_speed_10m,relative_humidity_2m,cloud_cover,weather_code&daily=sunrise,sunset&hourly=temperature_2m,precipitation_probability,weather_code&timezone=auto`;
+        const url = `https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&current=temperature_2m,apparent_temperature,precipitation,wind_speed_10m,relative_humidity_2m,cloud_cover,weather_code&daily=sunrise,sunset,weather_code&hourly=temperature_2m,precipitation,precipitation_probability,weather_code&timezone=auto`;
         const resposta = await fetch(url);
         const dados = await resposta.json();
 		console.log("URL:", url);
@@ -210,17 +210,23 @@ function atualizarInterface() {
 }
 
 /* =====================================================
-   ATUALIZAR DESCRIÇÃO
+   ATUALIZAR DESCRIÇÃO (MAIS SENSÍVEL)
 ===================================================== */
 function atualizarDescricao(h) {
-    for (let i = 0; i < 6; i++) {
-        if ((h.precipitation_probability[i] || 0) > 30) {
+    // Verifica próximas 12 horas com limite menor (20% probabilidade)
+    // Também considera a quantidade de precipitação (> 0.5mm)
+    for (let i = 0; i < 12; i++) {
+        const prob = (h.precipitation_probability[i] || 0);
+        const amount = (h.precipitation[i] || 0);
+        
+        if (prob > 20 || amount > 0.5) {
             $('descricaoAtual').textContent = `🌧️ Chuva em ${i + 1}h`;
             climaAtual.proximaChuva = true;
-        return;
+            return;
         }
     }
     $('descricaoAtual').textContent = "Sem chuva nas próximas horas";
+    climaAtual.proximaChuva = false;
 }
 
 /* =====================================================

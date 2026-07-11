@@ -257,7 +257,7 @@ function atualizarDescricao(h) {
    RADAR
 ===================================================== */
 function atualizarMapa() {
-    $("mapaRadar").src = `https://www.rainviewer.com/map.html?loc=${LAT},${LON},8&oFa=0&layer=radar`;
+    $("mapaRadar").src = `https://www.rainviewer.com/map.html?loc=${LAT},${LON},10&oFa=0&layer=radar`;
 }
 
 /* =====================================================

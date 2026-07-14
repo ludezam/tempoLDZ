@@ -278,11 +278,13 @@ async function buscarCidade() {
 
     $("cidadeAtual").textContent = dados.results[0].name;
     atualizarClima();
+    atualizarDescrição();
     atualizarEstrelas();
 }
 
 function usarGPS() {
     iniciarGPS();
+    atualizarDescrição();
 }
 
 /* =====================================================
@@ -797,10 +799,12 @@ setInterval(() => {
 ===================================================== */
 
 function iniciarSistema() {
+    iniciarGPS();
+    atualizarDescrição();
     gerarEstrelas();
     atualizarEstrelas();
     iniciarRelampagos();
-    iniciarGPS();
+
 }
 iniciarSistema();
 });

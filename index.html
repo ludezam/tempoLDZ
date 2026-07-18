@@ -74,9 +74,14 @@
 
     <!-- RADAR -->
     <section class="radar">
-        <iframe
-            id="mapaRadar" title="Radar Meteorológico">
-        </iframe allowfullscreen>
+        <div class="radar-container">
+            <iframe id="mapaRadar" title="Radar Meteorológico" allowfullscreen>
+            </iframe>
+            <button id="btnFullscreenRadar" class="btn-fullscreen" title="Abrir em tela cheia">
+                ⛶ Tela Cheia
+            </button>
+        </div>
+		
         <a
             href="https://www.ipmetradar.com.br/2mobileGis.php" target="_blank" class="btn-ipmet">
             📡 Ver no IPMet
@@ -135,7 +140,15 @@
             Dados fornecidos por Open-Meteo, RainViewer e IPMet
         </p>
     </footer>
-
+    
+	<!-- MODAL FULLSCREEN -->
+    <div id="modalFullscreen" class="modal-fullscreen">
+        <div class="modal-header">
+            <button id="btnFecharModal" class="btn-fechar-modal">✕</button>
+        </div>
+        <iframe id="radarFullscreen" class="radar-fullscreen" title="Radar em Tela Cheia"></iframe>
+    </div>
+	
     <!-- ENTER PARA BUSCAR -->
     <script>
         document

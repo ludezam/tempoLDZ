@@ -162,10 +162,10 @@ body{
 
 @keyframes cloudMove{
    from{
-   transform:translateX(-20vw);
+   transform:translateX(-20vw) translateY(var(--ventoY, 0px));
    }
    to{
-   transform:translateX(120vw);
+   transform:translateX(120vw) translateY(var(--ventoY, 0px));
    }
 }
 

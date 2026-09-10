@@ -597,6 +597,11 @@ function criarNuvem(layer, frontal) {
     const vento = Math.max(1, climaAtual.vento);
     cloud.style.animation = `cloudMove ${ velocidadeBase - vento }s linear infinite`;
 
+    // ✅ NOVO: Calcular deslocamento vertical baseado na direção do vento
+    const rad = (climaAtual.direcaoVento - 180) * Math.PI / 180;
+    const ventoY = Math.cos(rad) * vento * 15; // Multiplicador para suavidade
+    cloud.style.setProperty('--ventoY', `${ventoY}px`);
+
     cloud.style.opacity = frontal ? 0.55 : 0.35;
     layer.appendChild(cloud);
 }

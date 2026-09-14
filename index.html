@@ -82,7 +82,7 @@
             <iframe id="mapaRadar" title="Radar Meteorológico" allowfullscreen>
             </iframe>
             <!-- BOTÃO TELA CHEIA - NÃO FUNCIONANDO
-			<button id="btnFullscreenRadar" class="btn-fullscreen" title="Abrir em tela cheia">
+		<button id="btnFullscreenRadar" class="btn-fullscreen" title="Abrir em tela cheia">
                 ⛶ Tela Cheia
             </button> -->
         </div>
@@ -99,10 +99,15 @@
 
     <!-- CONTROLES -->
     <section class="controles">
-        <input
-            id="cidade"
-            type="text"
-            placeholder="Digite uma cidade">
+        <div class="search-container">
+            <input
+                id="cidade"
+                type="text"
+                placeholder="Digite uma cidade"
+                autocomplete="off">
+            <!-- LISTA DE AUTOCOMPLETE -->
+            <div id="listaCidades" class="lista-cidades"></div>
+        </div>
         <button id="btnBuscar">
             🔎 Buscar Cidade
         </button>

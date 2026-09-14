@@ -461,6 +461,11 @@ body{
    z-index:10;
 }
 
+.search-container{
+   position:relative;
+   width:100%;
+}
+
 input{
    width:100%;
    padding:16px;
@@ -485,6 +490,66 @@ button{
 
 button:hover{
    background: rgba(255,255,255,.20);
+}
+
+/* =====================================================
+   AUTOCOMPLETE - LISTA DE CIDADES
+===================================================== */
+.lista-cidades{
+   position:absolute;
+   top:100%;
+   left:0;
+   right:0;
+   margin-top:8px;
+   border-radius:18px;
+   background: linear-gradient(180deg, rgba(255,255,255,.18), rgba(255,255,255,.06));
+   backdrop-filter:blur(20px) saturate(180%);
+   -webkit-backdrop-filter: blur(20px) saturate(180%);
+   border: 1px solid rgba(255,255,255,.12);
+   box-shadow: 0 10px 40px rgba(0,0,0,.18), 0 4px 12px rgba(0,0,0,.10);
+   max-height:0;
+   overflow:hidden;
+   transition: max-height 0.3s ease, opacity 0.3s ease;
+   opacity:0;
+   z-index:1000;
+}
+
+.lista-cidades.ativo{
+   max-height:300px;
+   opacity:1;
+}
+
+.cidade-item{
+   padding:14px 16px;
+   cursor:pointer;
+   border-bottom:1px solid rgba(255,255,255,.08);
+   transition:background 0.2s ease;
+   display:flex;
+   align-items:center;
+   gap:10px;
+   font-size:0.95rem;
+}
+
+.cidade-item:last-child{
+   border-bottom:none;
+}
+
+.cidade-item:hover{
+   background:rgba(255,255,255,.10);
+}
+
+.cidade-item.destaque{
+   background:rgba(255,255,255,.15);
+}
+
+.cidade-item-nome{
+   flex:1;
+   font-weight:500;
+}
+
+.cidade-item-estado{
+   font-size:0.85rem;
+   opacity:0.7;
 }
 
 /* =====================================================
@@ -571,5 +636,9 @@ footer{
    .btn-fullscreen{
       padding:8px 12px;
       font-size:.8rem;
+   }
+
+   .lista-cidades.ativo{
+      max-height:250px;
    }
 }

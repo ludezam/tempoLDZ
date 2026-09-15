@@ -40,6 +40,16 @@ function obterHoraCidade() {
 /* =====================================================
    CALCULA POSIÇÃO NO CICLO DIA/NOITE
 ===================================================== */
+function ehDiaHorario(hora) {
+
+    const horario = new Date(hora);
+
+    const nascer = new Date(climaAtual.sunrise);
+    const por = new Date(climaAtual.sunset);
+
+    return horario >= nascer && horario <= por;
+}
+
 function calcularPosicaoDiaNoite() {
     const agora = obterHoraCidade().getTime();
     const nascer = new Date(climaAtual.sunrise).getTime();
@@ -747,36 +757,60 @@ function atualizarSetaVento() {
 }
 
 /* =====================================================
-   WEATHER CODE → ÍCONE
+   FASE DA LUA - OBTER ÍCONE 
 ===================================================== */
-function obterIcone(codigo) {
-    if (codigo === 0)
-        return "☀️";
+function obterFaseLua() {
 
-    if ([1, 2, 3].includes(codigo))
-        return "🌤️";
+    const hoje = new Date();
+    const referencia = new Date("2024-01-11");
+    const dias = (hoje - referencia) / 86400000;
+    const ciclo = ((dias % 29.53) + 29.53) % 29.53;
 
-    if ([45, 48].includes(codigo))
-        return "🌫️";
+    if (ciclo < 1.8) return "🌑";
+    if (ciclo < 5.5) return "🌙";
+    if (ciclo < 9.2) return "🌓";
+    if (ciclo < 12.9) return "🌔";
+    if (ciclo < 16.6) return "🌕";
+    if (ciclo < 20.3) return "🌖";
+    if (ciclo < 24.0) return "🌗";
 
-    if ([51,53,55,56,57].includes(codigo))
-        return "🌦️";
-
-    if ([61,63,65,66,67].includes(codigo))
-        return "🌧️";
-
-    if ([71,73,75,77].includes(codigo))
-        return "❄️";
-
-    if ([80,81,82].includes(codigo))
-        return "🌧️";
-
-    if ([95,96,99].includes(codigo))
-        return "⛈️";
-
-    return "☁️";
+    return "🌘";
 }
 
+/* =====================================================
+   WEATHER CODE → ÍCONE
+===================================================== */
+function obterIcone(codigo, ehDia) {
+
+    // Céu limpo
+    if (codigo === 0) return ehDia ? "☀️" : obterFaseLua();
+	
+    // Poucas nuvens
+    if ([1, 2].includes(codigo)) return ehDia ? "🌤️" : "🌙☁️";
+
+    // Nublado
+    if (codigo === 3) return "☁️";
+
+    // Neblina
+    if ([45, 48].includes(codigo)) return "🌫️";
+
+    // Garoa
+    if ([51,53,55,56,57].includes(codigo)) return "🌦️";
+
+    // Chuva
+    if ([61,63,65,66,67].includes(codigo)) return "🌧️";
+
+    // Neve
+    if ([71,73,75,77].includes(codigo)) return "❄️";
+
+    // Pancadas
+    if ([80,81,82].includes(codigo)) return "🌧️";
+
+    // Tempestade
+    if ([95,96,99].includes(codigo)) return "⛈️";
+
+    return ehDia ? "🌤️" : "🌙";
+}
 /* =====================================================
    PREVISÃO 12H (COM DADOS DE PRECIPITAÇÃO)
 ===================================================== */
@@ -798,7 +832,8 @@ function renderizar12Horas(hourly) {
         const prob = hourly.precipitation_probability[i];
         const precip = hourly.precipitation[i] || 0;
         const codigo = hourly.weather_code[i];
-        const icone = obterIcone(codigo);
+		const ehDia = ehDiaHorario(hora);
+		const icone = obterIcone(codigo, ehDia);
 
         // Formatar informação de chuva
         let infoChuvaCard = "";

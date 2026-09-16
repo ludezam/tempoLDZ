@@ -832,8 +832,22 @@ function renderizar12Horas(hourly) {
         const prob = hourly.precipitation_probability[i];
         const precip = hourly.precipitation[i] || 0;
         const codigo = hourly.weather_code[i];
-		const ehDia = ehDiaHorario(hora);
-		const icone = obterIcone(codigo, ehDia);
+		
+        // nova função ehDia 
+        const horaCard = new Date(hora).getHours();
+        const horaNascer =
+            new Date(climaAtual.sunrise).getHours();
+        const horaPor =
+            new Date(climaAtual.sunset).getHours();
+        const ehDia =
+            horaCard >= horaNascer &&
+            horaCard < horaPor;
+
+        const icone =
+            obterIcone(codigo, ehDia);
+        
+        //const ehDia = ehDiaHorario(hora);
+		//const icone = obterIcone(codigo, ehDia);
 
         // Formatar informação de chuva
         let infoChuvaCard = "";
@@ -896,7 +910,6 @@ setInterval(() => {
 
 function iniciarSistema() {
     iniciarGPS();
-    atualizarDescricao(dados.hourly);
     gerarEstrelas();
     atualizarEstrelas();
     iniciarRelampagos();

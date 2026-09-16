@@ -11,6 +11,7 @@ const $ = id => document.getElementById(id);
 let LAT = null;
 let LON = null;
 let timezoneAtual = "";
+let cidadesEncontradas = [];
 
 let climaAtual = {
     temperatura: 0,
@@ -27,6 +28,91 @@ let climaAtual = {
     horarioLocal: null,
     proximaChuva: false
 };
+
+/* =====================================================
+   Autocompletar buscar cidade 
+===================================================== */
+async function buscarSugestoesCidade() {
+
+    const texto = $("cidade").value.trim();
+
+    if (texto.length < 2) {
+        $("listaCidades").innerHTML = "";
+        $("listaCidades").classList.remove("ativo");
+        return;
+    }
+
+    try {
+
+    const url = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(texto)}&count=10&language=pt`;
+    
+    const resposta = await fetch(url);
+
+    const dados = await resposta.json();
+
+    cidadesEncontradas =
+        dados.results || [];
+
+    renderizarSugestoes();
+
+} catch (erro) {
+
+    console.error(erro);
+
+}
+
+function renderizarSugestoes() {
+
+    const lista = $("listaCidades");
+
+    if (!cidadesEncontradas.length) {
+
+        lista.innerHTML = "";
+        lista.classList.remove("ativo");
+
+        return;
+    }
+
+    lista.innerHTML = cidadesEncontradas.map(cidade => `
+
+        <div class="cidade-item"
+             data-lat="${cidade.latitude}"
+             data-lon="${cidade.longitude}"
+             data-nome="${cidade.name}">
+
+            <div class="cidade-item-nome">
+                ${cidade.name}
+            </div>
+
+            <div class="cidade-item-estado">
+                ${cidade.admin1 || ""}
+                ${cidade.country ? `- ${cidade.country}` : ""}
+            </div>
+
+        </div>
+
+    `).join("");
+
+    lista.classList.add("ativo");
+}
+
+$("listaCidades").addEventListener("click", e => {
+
+    const item = e.target.closest(".cidade-item");
+
+    if (!item) return;
+
+    LAT = Number(item.dataset.lat);
+
+    LON = Number(item.dataset.lon);
+
+    $("cidade").value = item.dataset.nome;
+    $("listaCidades").innerHTML = "";
+    $("listaCidades") .classList.remove("ativo");
+
+    atualizarClima();
+});
+
 
 /* =====================================================
    TEMPO LOCAL DA CIDADE
@@ -890,6 +976,13 @@ function renderizar12Horas(hourly) {
 $("btnBuscar").addEventListener("click", buscarCidade);
 $("btnGPS").addEventListener("click", usarGPS);
 $('btnRefresh').addEventListener('click', () => { window.location.reload(); });
+
+$("cidade").addEventListener("input",buscarSugestoesCidade);
+document.addEventListener("click", e => {
+    if (!e.target.closest(".search-container")) {
+        $("listaCidades").classList.remove("ativo");
+    }
+});
 
 /* =====================================================
    LOOPS

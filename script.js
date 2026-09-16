@@ -845,79 +845,11 @@ function renderizar12Horas(hourly) {
 
         const icone =
             obterIcone(codigo, ehDia);
-        
-        //const ehDia = ehDiaHorario(hora);
-		//const icone = obterIcone(codigo, ehDia);
 
         // Formatar informação de chuva
         let infoChuvaCard = "";
         if (precip > 0) {
             infoChuvaCard = `${precip.toFixed(1)}mm - ${prob}%`;
-        } else {
-            infoChuvaCard = `${prob}%`;
-        }
-
-        html += `
-        <div class="previsao-card">
-
-            <div class="hora">
-                ${hora.slice(11,16)}
-            </div>
-
-            <div class="icone">
-                ${icone}
-            </div>
-
-            <div class="temp">
-                ${temp}°
-            </div>
-
-            <div class="chuva">
-                💧 ${infoChuvaCard}
-            </div>
-
-        </div>
-        `;
-    }
-
-    container.innerHTML = html;
-}
-
-/* =====================================================
-   EVENTOS
-===================================================== */
-
-$("btnBuscar").addEventListener("click", buscarCidade);
-$("btnGPS").addEventListener("click", usarGPS);
-$('btnRefresh').addEventListener('click', () => { window.location.reload(); });
-
-/* =====================================================
-   LOOPS
-===================================================== */
-
-setInterval(() => {
-    atualizarClima();
-}, 300000); // 5 min
-
-setInterval(() => {
-    atualizarEstrelas();
-    atualizarViaLactea();
-}, 60000); // 1 min
-
-/* =====================================================
-   INICIALIZAÇÃO
-===================================================== */
-
-function iniciarSistema() {
-    iniciarGPS();
-    gerarEstrelas();
-    atualizarEstrelas();
-    iniciarRelampagos();
-
-}
-iniciarSistema();
-});
-
         } else {
             infoChuvaCard = `${prob}%`;
         }

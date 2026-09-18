@@ -767,7 +767,7 @@ function obterFaseLua() {
     const ciclo = ((dias % 29.53) + 29.53) % 29.53;
 
     if (ciclo < 1.8) return "🌑";
-    if (ciclo < 5.5) return "🌙";
+    if (ciclo < 5.5) return "🌒";
     if (ciclo < 9.2) return "🌓";
     if (ciclo < 12.9) return "🌔";
     if (ciclo < 16.6) return "🌕";
@@ -786,7 +786,7 @@ function obterIcone(codigo, ehDia) {
     if (codigo === 0) return ehDia ? "☀️" : obterFaseLua();
 	
     // Poucas nuvens
-    if ([1, 2].includes(codigo)) return ehDia ? "🌤️" : "🌙☁️";
+    if ([1, 2].includes(codigo)) return ehDia ? "🌤️" : obterFaseLua() "☁️";
 
     // Nublado
     if (codigo === 3) return "☁️";

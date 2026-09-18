@@ -786,7 +786,7 @@ function obterIcone(codigo, ehDia) {
     if (codigo === 0) return ehDia ? "☀️" : obterFaseLua();
 	
     // Poucas nuvens
-    if ([1, 2].includes(codigo)) return ehDia ? "🌤️" : obterFaseLua() "☁️";
+    if ([1, 2].includes(codigo)) return ehDia ? "🌤️" : `${obterFaseLua()}☁️`;
 
     // Nublado
     if (codigo === 3) return "☁️";

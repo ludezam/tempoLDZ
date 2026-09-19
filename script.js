@@ -414,8 +414,30 @@ function atualizarCeu() {
 }
 
 /* =====================================================
-   SOL E LUA
+   FASE DA LUA / SOL E LUA
 ===================================================== */
+function atualizarFaseVisualLua() {
+    const moon = document.querySelector(".moon");
+
+    const hoje = new Date();
+    const referencia = new Date("2024-01-11");
+    const dias = (hoje - referencia) / 86400000;
+    const ciclo = ((dias % 29.53) + 29.53) % 29.53;
+
+    let deslocamento;
+
+    if (ciclo < 14.76) {
+        // Nova → Cheia
+        deslocamento = 45 - (ciclo / 14.76) * 90;
+    } else {
+        // Cheia → Nova
+        deslocamento = -45 + ((ciclo - 14.76) / 14.76) * 90;
+    }
+
+    moon.style.setProperty("--fase-lua", `${deslocamento}px`);
+}
+
+
 function atualizarSolLua() {
     const sun = document.querySelector(".sun");
     const moon = document.querySelector(".moon");

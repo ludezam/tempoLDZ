@@ -75,7 +75,7 @@ body{
     height: 100%;
     border-radius: 50%;
     background: #020611;
-    transform: translateX(var(--fase-lua, 45px));
+    transform: translateX(calc(var(--fase-lua, 45px) * -1));
 }
 
 /* =====================================================

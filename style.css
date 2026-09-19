@@ -74,7 +74,7 @@ body{
     width: 100%;
     height: 100%;
     border-radius: 50%;
-    background: #020611;
+    background: #393c45; /* cor antiga mais escura: #020611 */
     transform: translateX(calc(var(--fase-lua, 45px) * -1));
 }
 

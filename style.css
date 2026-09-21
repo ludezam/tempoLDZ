@@ -84,8 +84,8 @@ body{
     height: 100%;
     border-radius: 50%;
     background: #393c45; /* cor antiga mais escura: #020611 */
-    left: var (--fase-lua, 45px);
-   /* transform: translateX(calc(var(--fase-lua, 45px) * -1)); */
+/*   left: var (--fase-lua, 45px); */
+    transform: translateX(calc(var(--fase-lua, 45px) * -1));
 }
 
 /* =====================================================

@@ -68,7 +68,8 @@ body{
    width:90px;
    height:90px;
    border-radius:50%;
-   background: radial-gradient(circle at 35% 35%, #ffffff, #d6dde5 70%);
+   background: radial-gradient(circle, #ffffff 0%, #dadde5 75%, #cfd3db 100%);
+   /* background: radial-gradient(circle at 35% 35%, #ffffff, #d6dde5 70%); */
    box-shadow: 0 0 25px rgba(255,255,255,.3), 0 0 60px rgba(255,255,255,.15);
    pointer-events:none;
    transition:all 1s linear;
@@ -79,11 +80,12 @@ body{
 .moon::after{
     content: "";
     position: absolute;
-    width: 100%;
+    width: 130%;
     height: 100%;
     border-radius: 50%;
     background: #393c45; /* cor antiga mais escura: #020611 */
-    transform: translateX(calc(var(--fase-lua, 45px) * -1));
+    left: var (--fase-lua, 45px);
+   /* transform: translateX(calc(var(--fase-lua, 45px) * -1)); */
 }
 
 /* =====================================================

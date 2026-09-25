@@ -68,37 +68,107 @@ body{
    width:90px;
    height:90px;
    border-radius:50%;
-   background: radial-gradient(circle, #ffffff 0%, #dadde5 75%, #cfd3db 100%);
-   /* background: radial-gradient(circle at 35% 35%, #ffffff, #d6dde5 70%); */
+   /*background: radial-gradient(circle, #ffffff 0%, #dadde5 75%, #cfd3db 100%);*/
+   background: radial-gradient(circle at 30% 30%, #ffffff 0%, #f1f3f6 25%, #d7dae0 75%, #b8bcc3 100%);
    box-shadow: 0 0 25px rgba(255,255,255,.3), 0 0 60px rgba(255,255,255,.15);
    pointer-events:none;
    transition:all 1s linear;
-   z-index:-5;
+   z-index:-6;
    overflow: hidden;
+}
+.moon::before{
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    pointer-events: none;
 
+    background:
+        /* Mare Imbrium */
+        radial-gradient(
+            circle at 35% 30%,
+            rgba(120,120,120,.15) 0%,
+            rgba(120,120,120,.15) 9%,
+            transparent 14%
+        ),
+        /* Oceanus Procellarum */
+        radial-gradient(
+            circle at 28% 48%,
+            rgba(100,100,100,.12) 0%,
+            rgba(100,100,100,.12) 11%,
+            transparent 17%
+        ),
+        /* Mare Serenitatis */
+        radial-gradient(
+            circle at 58% 28%,
+            rgba(130,130,130,.12) 0%,
+            rgba(130,130,130,.12) 6%,
+            transparent 10%
+        ),
+        /* Mare Tranquillitatis */
+        radial-gradient(
+            circle at 63% 42%,
+            rgba(120,120,120,.10) 0%,
+            rgba(120,120,120,.10) 7%,
+            transparent 11%
+        ),
+        /* Mare Nubium */
+        radial-gradient(
+            circle at 45% 68%,
+            rgba(110,110,110,.12) 0%,
+            rgba(110,110,110,.12) 8%,
+            transparent 13%
+        ),
+        /* Crateras pequenas */
+        radial-gradient(
+            circle at 70% 62%,
+            rgba(80,80,80,.15) 0 2px,
+            transparent 3px
+        ),
+        radial-gradient(
+            circle at 22% 70%,
+            rgba(80,80,80,.12) 0 3px,
+            transparent 4px
+        ),
+        radial-gradient(
+            circle at 75% 20%,
+            rgba(80,80,80,.12) 0 2px,
+            transparent 3px
+        );
+    opacity: .75;
+    filter: blur(.3px) drop-shadow(0 1px 1px rgba(255,255,255,.08));
+	filter: drop-shadow(1px 1px 1px rgba(0,0,0,.12)) drop-shadow(-1px -1px 1px rgba(255,255,255,.08));
+    z-index: 1;
 }
 .moon::after{
     content: "";
     position: absolute;
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    background: #393c45; /* cor antiga mais escura: #020611 */
-/*   left: var (--fase-lua, 45px); */
-    transform: translateX(calc(var(--fase-lua, 45px) * -1));
-}
 
-/* =====================================================
-   VIA LÁCTEA
-===================================================== */
-.milkyway{
-   position:fixed;
-   inset:0;
-   opacity:0;
-   pointer-events:none;
-   z-index:-11;
-   background: radial-gradient(ellipse at center, rgba(255,255,255,.08), transparent 70%);
-   filter: blur(50px); transition: opacity 3s ease;
+    width: 120%;
+    height: 100%;
+
+    top: 0;
+    left: 0;
+
+    border-radius: 50%;
+
+    background:
+        radial-gradient(
+            circle at center,
+            rgba(57,60,69,.92) 0%,
+            rgba(57,60,69,.96) 75%,
+            rgba(40,42,50,1) 100%
+        );
+
+    transform:
+        translateX(calc(var(--fase-lua, 0px) * -1));
+
+    transition:
+        transform 1s linear;
+
+    z-index: 2;
+
+    pointer-events: none;
 }
 
 /* =====================================================

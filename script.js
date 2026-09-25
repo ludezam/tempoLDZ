@@ -188,7 +188,6 @@ async function atualizarClima() {
         atualizarChuva();
         atualizarNeblina();
         atualizarEstrelas();
-        atualizarViaLactea();
     }
     catch (erro) {
         console.error(erro);
@@ -419,28 +418,27 @@ function atualizarCeu() {
 function atualizarFaseVisualLua() {
     const moon = document.querySelector(".moon");
 
-    const hoje = new Date();
-    const referencia = new Date("2024-01-11");
+	const hoje = climaAtual.horarioLocal ? new Date(climaAtual.horarioLocal) : new Date();
+	const referencia = new Date("2024-01-11");
     const dias = (hoje - referencia) / 86400000;
     const ciclo = ((dias % 29.53) + 29.53) % 29.53;
+    const fase = ciclo / 29.53;
+    const iluminacao = (1 - Math.cos(fase * 2 * Math.PI)) / 2;
 
-    let deslocamento;
+    let deslocamento = iluminacao * 90;
 
-    if (ciclo < 14.76) {
-        // Nova → Cheia
-        deslocamento = 45 - (ciclo / 14.76) * 90;
-    } else {
-        // Cheia → Nova
-        deslocamento = -45 + ((ciclo - 14.76) / 14.76) * 90;
-    }
-
-    moon.style.setProperty("--fase-lua", `${deslocamento}px`);
+    moon.style.setProperty(
+        "--fase-lua",
+        `${deslocamento}px`
+    );
+	// só revela depois de calcular
+	moon.style.opacity = "";
 }
-
 
 function atualizarSolLua() {
     const sun = document.querySelector(".sun");
     const moon = document.querySelector(".moon");
+	atualizarFaseVisualLua();
     const ciclo = calcularPosicaoDiaNoite();
     const cloudFactor = climaAtual.cloudCover / 100;
 
@@ -472,6 +470,7 @@ function atualizarSolLua() {
 
         moon.style.left = x + "vw";
         moon.style.top = y + "vh";
+		atualizarFaseVisualLua();
         moon.style.opacity = Math.max(0.15, 0.85 - (cloudFactor * 0.6));
         sun.style.opacity = 0;
     }
@@ -503,6 +502,18 @@ function gerarEstrelas() {
         star.style.height = size + "px";
         star.style.animationDuration = (1 + Math.random() * 4) + "s";
         star.style.opacity = 0.3 + Math.random() * 0.7;
+
+		const cores = [
+			"#ffffff", // branca
+			"#fff4d6", // amarelada
+			"#ffe7b3", // dourada suave
+			"#dcecff", // azulada
+			"#e8f2ff"  // azul clara
+		];
+
+		star.style.background =
+		cores[Math.floor(Math.random() * cores.length)];
+
         layer.appendChild(star);
     }
     estrelasCriadas = true;
@@ -529,23 +540,6 @@ function atualizarEstrelas() {
 
     stars.style.opacity = Math.max(0.15, 1 - cloud);
 	document.body.style.color = "#fff";
-}
-
-/* =====================================================
-   VIA LÁCTEA
-===================================================== */
-function atualizarViaLactea() {
-    const milky = $("milkyway");
-    const ciclo = calcularPosicaoDiaNoite();
-    const cloud = climaAtual.cloudCover;
-
-    // Via láctea apenas à noite e com poucas nuvens
-    if (!ciclo.ehDia && cloud < 10) {
-        milky.style.opacity = 0.5;
-    }
-    else {
-        milky.style.opacity = 0;
-    }
 }
 
 /* =====================================================
@@ -591,7 +585,6 @@ setInterval(() => {
     atualizarCeu();
     atualizarSolLua();
     atualizarEstrelas();
-    atualizarViaLactea();
 }, 30000); // 30 seg
 
 /* =====================================================
@@ -920,7 +913,6 @@ setInterval(() => {
 
 setInterval(() => {
     atualizarEstrelas();
-    atualizarViaLactea();
 }, 60000); // 1 min
 
 /* =====================================================

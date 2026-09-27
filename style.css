@@ -407,6 +407,41 @@ body{
    border-radius:22px;
    text-align:center;
 }
+.item.calor-extremo{
+    position: relative;
+    overflow: hidden;
+}
+.item.calor-extremo::after{
+    content:"";
+    position:absolute;
+    left:0;
+    right:0;
+    bottom:0;
+    height:45%;
+    background:
+        linear-gradient(
+            to top,
+            rgba(255,120,0,.35),
+            rgba(255,180,0,.15),
+            transparent
+        );
+    animation: calor-extremo 2s ease-in-out infinite;
+    pointer-events:none;
+}
+
+	@keyframes calor-extremo{
+    0%{
+        opacity:.32; transform:translateY(0);
+    }
+
+    50%{
+        opacity:.6; transform:translateY(-3px);
+    }
+
+    100%{
+        opacity:.2; transform:translateY(0);
+    }
+}
 
 .item span{
    display:block;
@@ -419,7 +454,7 @@ body{
    display:block;
    margin-top:6px;
    font-size:1.1rem;
-}
+}	
 
 /* =====================================================
    RADAR

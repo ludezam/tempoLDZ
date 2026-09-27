@@ -425,7 +425,7 @@ function atualizarFaseVisualLua() {
     const fase = ciclo / 29.53;
     const iluminacao = (1 - Math.cos(fase * 2 * Math.PI)) / 2;
 
-    let deslocamento = iluminacao * 90;
+    let deslocamento = iluminacao * 110;
 
     moon.style.setProperty(
         "--fase-lua",

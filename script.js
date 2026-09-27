@@ -200,6 +200,12 @@ async function atualizarClima() {
 function atualizarInterface() {
     $("tempAtual").textContent = Math.round(climaAtual.temperatura) + "°";
     $("sensacaoAtual").textContent = Math.round(climaAtual.sensacao) + "°";
+		const cardSensacao = $("sensacaoAtual").closest(".item");
+		cardSensacao.classList.remove("calor-extremo");
+
+		if(climaAtual.sensacao >= 38){
+			cardSensacao.classList.add("calor-extremo");
+		}
     $("umidadeAtual").textContent = climaAtual.umidade + "%";
     $("ventoAtual").textContent = Math.round(climaAtual.vento) + " km/h";
 

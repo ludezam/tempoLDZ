@@ -116,7 +116,7 @@ async function atualizarNomeCidade() {
     }
     catch (erro) {
         console.error("❌ Erro ao obter cidade:", erro);
-        $("cidadeAtual").textContent = `${LAT.toFixed(2)}, ${LON.toFixed(2)}`;
+        $("cidadeAtual").textContent = "Local atual";
     }
 }
 

@@ -14,7 +14,10 @@ let timezoneAtual = "";
 let versaoLocalizacao = 0;
 
 // Mantém o critério anterior e aplica o modo leve a todos os efeitos locais.
-const modoLeve = window.innerWidth < 700 || navigator.hardwareConcurrency <= 4;
+const dispositivoAppleMovel = /iPhone|iPad|iPod/.test(navigator.userAgent) ||
+    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+const modoLeve = !dispositivoAppleMovel &&
+    (window.innerWidth < 700 || navigator.hardwareConcurrency <= 4);
 document.documentElement.classList.toggle("modo-leve", modoLeve);
 
 let climaAtual = {
@@ -1047,5 +1050,6 @@ function iniciarSistema() {
 }
 iniciarSistema();
 });
+
 
 

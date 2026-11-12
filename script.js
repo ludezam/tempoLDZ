@@ -12,6 +12,7 @@ let LAT = null;
 let LON = null;
 let timezoneAtual = "";
 let versaoLocalizacao = 0;
+let versaoConsultaClima = 0;
 
 // Mantém o critério anterior e aplica o modo leve a todos os efeitos locais.
 const dispositivoAppleMovel = /iPhone|iPad|iPod/.test(navigator.userAgent) ||
@@ -171,10 +172,18 @@ function iniciarGPS(forcarAtualizacao = false) {
 async function atualizarClima() { 
     if (LAT === null || LON === null)
         return;
+    const consulta = ++versaoConsultaClima;
+    const localizacao = versaoLocalizacao;
+    const latitude = LAT;
+    const longitude = LON;
     try {
-        const url = `https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&current=temperature_2m,apparent_temperature,precipitation,wind_speed_10m,wind_direction_10m,relative_humidity_2m,cloud_cover,weather_code&daily=sunrise,sunset&hourly=temperature_2m,precipitation_probability,precipitation,weather_code&timezone=auto`;
-        const resposta = await fetch(url);
+        const url = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,apparent_temperature,precipitation,wind_speed_10m,wind_direction_10m,relative_humidity_2m,cloud_cover,weather_code&daily=sunrise,sunset&hourly=temperature_2m,precipitation_probability,precipitation,weather_code&timezone=auto`;
+        const resposta = await fetch(url, { cache: "no-store" });
+        if (!resposta.ok) throw new Error(`Erro HTTP ${resposta.status}`);
         const dados = await resposta.json();
+        // Ignora respostas de outra cidade ou de uma atualização anterior.
+        if (consulta !== versaoConsultaClima || localizacao !== versaoLocalizacao ||
+            latitude !== LAT || longitude !== LON) return;
 		console.log("URL:", url);
 		console.log("Resposta Raw:", dados);
 
@@ -1050,6 +1059,7 @@ function iniciarSistema() {
 }
 iniciarSistema();
 });
+
 
 
 

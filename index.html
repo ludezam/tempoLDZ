@@ -5,8 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title> 🌤️ Tempo LDZ </title>
-    <link rel="stylesheet" href="style.css?v=20261111-3">
-    <script defer src="script.js?v=20261111-3"></script>
+    <link rel="stylesheet" href="style.css?v=20261111-4">
+    <script defer src="script.js?v=20261111-4"></script>
 </head>
 
 <body>
@@ -30,6 +30,10 @@
     <section class="resumo-clima">
         <div class="cidade">
             📍 <span id="cidadeAtual">Buscando localização...</span>
+            <details id="detalhesLocalizacao" class="localizacao-privada" hidden>
+                <summary id="controleLocalizacao">Mostrar localização</summary>
+                <span id="coordenadasLocalizacao"></span>
+            </details>
         </div>
         <div class="temperatura-principal">
             <span id="tempAtual">--°</span>
@@ -106,6 +110,9 @@
         <button id="btnRefresh">
             🔄 Atualizar
         </button>
+        <button id="btnModo" class="btn-modo" type="button" aria-label="Modo leve" aria-pressed="false">
+            <span aria-hidden="true">⇄</span> <span id="rotuloModo">Visual automático</span>
+        </button>
     </section>
 
     <!-- PREVISÃO 12 HORAS -->
@@ -145,4 +152,5 @@
     </footer>
 </body>
 </html>
+
 

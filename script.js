@@ -14,6 +14,7 @@ let versaoLocalizacao = 0;
 let versaoConsultaClima = 0;
 let consultaClimaAtiva;
 let ultimaAtualizacao = 0;
+let localizacaoGPS = null;
 const INTERVALO_CLIMA = 300000;
 const CODIGOS_CHUVA = [51, 53, 55, 56, 57, 61, 63, 65, 66, 67, 80, 81, 82, 95, 96, 99];
 
@@ -26,7 +27,7 @@ const choveAgora = () => climaAtual.chuva > 0 || CODIGOS_CHUVA.includes(climaAtu
 // Mantém o critério anterior e aplica o modo leve a todos os efeitos locais.
 const dispositivoAppleMovel = /iPhone|iPad|iPod/.test(navigator.userAgent) ||
     (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
-const modoLeve = !dispositivoAppleMovel &&
+let modoLeve = !dispositivoAppleMovel &&
     (window.innerWidth < 700 || navigator.hardwareConcurrency <= 4);
 document.documentElement.classList.toggle("modo-leve", modoLeve);
 
@@ -95,7 +96,25 @@ function calcularPosicaoDiaNoite() {
 /* =====================================================
    GEOLOCALIZAÇÃO
 ===================================================== */
+function ocultarLocalizacao() {
+    localizacaoGPS = null;
+    $("controleLocalizacao").textContent = "Mostrar localização";
+    $("detalhesLocalizacao").open = false;
+    $("detalhesLocalizacao").hidden = true;
+    $("coordenadasLocalizacao").textContent = "";
+}
+
+$("detalhesLocalizacao").addEventListener("toggle", () => {
+    const aberto = $("detalhesLocalizacao").open;
+    $("controleLocalizacao").textContent = aberto ? "Ocultar localização" : "Mostrar localização";
+    $("coordenadasLocalizacao").textContent = aberto && localizacaoGPS
+        ? `${localizacaoGPS.latitude.toFixed(3)}, ${localizacaoGPS.longitude.toFixed(3)}` +
+          (Number.isFinite(localizacaoGPS.accuracy) ? ` · Precisão estimada: ${Math.round(localizacaoGPS.accuracy)} m` : "")
+        : "";
+});
+
 function iniciarGPS(forcarAtualizacao = false) {
+    ocultarLocalizacao();
     const versao = ++versaoLocalizacao;
     $("cidadeAtual").textContent =
         "Buscando localização...";
@@ -110,8 +129,9 @@ function iniciarGPS(forcarAtualizacao = false) {
             LAT = pos.coords.latitude;
             LON = pos.coords.longitude;
             // A API de busca não oferece geocodificação reversa neste endpoint.
-            $("cidadeAtual").textContent = `Local atual (${LAT.toFixed(3)}, ${LON.toFixed(3)})`;
-            $("cidadeAtual").title = `Precisão estimada: ${Math.round(pos.coords.accuracy || 0)} m`;
+            $("cidadeAtual").textContent = "Local atual";
+            localizacaoGPS = { latitude: LAT, longitude: LON, accuracy: pos.coords.accuracy };
+            $("detalhesLocalizacao").hidden = false;
             atualizarClima();
         },
         erro => {
@@ -321,11 +341,11 @@ function fecharSugestoes() {
 
 function selecionarCidade(local) {
     fecharSugestoes();
+    ocultarLocalizacao();
     ++versaoLocalizacao;
     LAT = local.latitude;
     LON = local.longitude;
     campoCidade.value = local.name;
-    $("cidadeAtual").removeAttribute("title");
     $("cidadeAtual").textContent = [local.name, local.admin1, local.country]
         .filter(Boolean).join(", ");
     atualizarClima();
@@ -662,8 +682,8 @@ function criarEstrelaCadente() {
     }, 2500);
 }
 
-if (!modoLeve) setInterval(() => {
-    if (document.hidden || !climaAtual.sunrise) return;
+setInterval(() => {
+    if (modoLeve || document.hidden || !climaAtual.sunrise) return;
     const ciclo = calcularPosicaoDiaNoite();
     if (ciclo.ehDia)
         return;
@@ -802,9 +822,8 @@ function atualizarNeblina() {
    RELÂMPAGOS
 ===================================================== */
 function iniciarRelampagos() {
-    if (modoLeve) return;
     setInterval(() => {
-        if (document.hidden) return;
+        if (modoLeve || document.hidden) return;
         if (
             climaAtual.weatherCode !== 95 &&
             climaAtual.weatherCode !== 96 &&
@@ -968,6 +987,27 @@ function renderizar12Horas(hourly, daily) {
    EVENTOS
 ===================================================== */
 
+function atualizarRotuloModo() {
+    $("rotuloModo").textContent = `Visual: ${modoLeve ? "leve" : "normal"}`;
+    $("btnModo").setAttribute("aria-pressed", String(modoLeve));
+    $("btnModo").title = `Alternar para visual ${modoLeve ? "normal" : "leve"}`;
+}
+
+$("btnModo").addEventListener("click", () => {
+    modoLeve = !modoLeve;
+    document.documentElement.classList.toggle("modo-leve", modoLeve);
+    atualizarRotuloModo();
+    document.querySelectorAll(".meteor").forEach(elemento => elemento.remove());
+    $("lightning").style.opacity = 0;
+    gerarEstrelas();
+    atualizarEstrelas();
+    if (climaAtual.horarioLocal) {
+        atualizarNuvens();
+        atualizarChuva();
+        atualizarNeblina();
+    }
+});
+
 $("btnBuscar").addEventListener("click", buscarCidade);
 $("btnGPS").addEventListener("click", usarGPS);
 $('btnRefresh').addEventListener('click', () => { window.location.reload(); });
@@ -990,6 +1030,7 @@ document.addEventListener("visibilitychange", () => {
 ===================================================== */
 
 function iniciarSistema() {
+    atualizarRotuloModo();
     iniciarGPS();
     atualizarEstrelas();
     iniciarRelampagos();
@@ -997,3 +1038,4 @@ function iniciarSistema() {
 }
 iniciarSistema();
 });
+

@@ -57,7 +57,7 @@ function previsao(temperatura = 22, chuva = .1, codigo = 51) {
             });
             const page = await context.newPage();
             const erros = [];
-            let chamadasRadar = 0, chamadasReverse = 0, falhar = false;
+            let chamadasRadar = 0, chamadasReverse = 0, chamadasClima = 0, falhar = false;
             let atrasar = false, liberar, inicioAtrasada;
             let consulta = previsao();
             page.on('pageerror', e => erros.push(e.message));
@@ -65,6 +65,7 @@ function previsao(temperatura = 22, chuva = .1, codigo = 51) {
                 const url = new URL(route.request().url());
                 if (url.origin === origin) return route.continue();
                 if (url.pathname.endsWith('/forecast')) {
+                    chamadasClima++;
                     assert.equal(url.searchParams.get('forecast_days'), '2');
                     const dados = structuredClone(consulta);
                     if (atrasar) {
@@ -104,7 +105,31 @@ function previsao(temperatura = 22, chuva = .1, codigo = 51) {
             assert.equal((await page.locator('.previsao-card .icone').nth(8).textContent()).trim(), '☀️');
             assert.match(await page.locator('#statusChuva').textContent(), /Chovendo agora/);
             assert.equal(await page.locator('#horaLocal').textContent(), '21:45');
-            assert.match(await page.locator('#cidadeAtual').textContent(), /-20.820, -49.379/);
+            assert.equal(await page.locator('#cidadeAtual').textContent(), 'Local atual');
+            assert.equal(await page.locator('#cidadeAtual').getAttribute('title'), null);
+            assert.equal(await page.locator('#coordenadasLocalizacao').textContent(), '');
+            assert.equal(await page.locator('#detalhesLocalizacao').evaluate(e => e.open), false);
+            await page.click('#controleLocalizacao');
+            await page.waitForFunction(() => document.querySelector('#coordenadasLocalizacao').textContent.includes('-20.820, -49.379'));
+            await page.click('#controleLocalizacao');
+            await page.waitForFunction(() => document.querySelector('#coordenadasLocalizacao').textContent === '');
+
+            const climaAntes = chamadasClima;
+            const radarAntes = chamadasRadar;
+            await page.click('#btnModo');
+            assert.equal(await page.locator('#btnModo').getAttribute('aria-pressed'), String(!leve));
+            assert.equal(await page.locator('.star').count(), leve ? 350 : 120);
+            assert.equal(await page.locator('.cloud').count(), leve ? 38 : 0);
+            assert.equal(await page.locator('.drop').count(), leve ? 100 : 50);
+            assert.equal(await page.locator('#tempAtual').textContent(), '22°');
+            await page.click('#btnModo');
+            assert.equal(await page.locator('#btnModo').getAttribute('aria-pressed'), String(leve));
+            assert.equal(await page.locator('.star').count(), leve ? 120 : 350);
+            assert.equal(await page.locator('.cloud').count(), leve ? 0 : 38);
+            assert.equal(chamadasClima, climaAntes);
+            assert.equal(chamadasRadar, radarAntes);
+            await page.click('#controleLocalizacao');
+            await page.waitForFunction(() => document.querySelector('#coordenadasLocalizacao').textContent.length > 0);
             assert.equal(chamadasReverse, 0);
             assert.equal(await page.evaluate(() => opcoesGPS[0].maximumAge), 300000);
 
@@ -113,6 +138,8 @@ function previsao(temperatura = 22, chuva = .1, codigo = 51) {
             await page.locator('.cidade-item').first().click();
             await page.waitForFunction(() => document.querySelector('#cidadeAtual').textContent.includes('São Paulo'));
             assert.equal(await page.locator('.cidade-item').count(), 0);
+            assert.equal(await page.locator('#detalhesLocalizacao').isVisible(), false);
+            assert.equal(await page.locator('#coordenadasLocalizacao').textContent(), '');
             assert.equal(chamadasRadar, 1); // Mesmas coordenadas não recarregam o iframe.
 
             await page.fill('#cidade', 'Cam');
@@ -157,10 +184,11 @@ function previsao(temperatura = 22, chuva = .1, codigo = 51) {
             }
             assert.deepEqual(erros, []);
             await context.close();
-            console.log(`${perfil}: previsão, fuso, chuva, sugestões, GPS, radar, concorrência e falha HTTP OK`);
+            console.log(`${perfil}: privacidade, troca de visual e regressão de previsão/busca/radar OK`);
         }
     } finally {
         if (browser) await browser.close();
         await new Promise(resolve => server.close(resolve));
     }
 })().catch(erro => { console.error(erro); process.exitCode = 1; });
+

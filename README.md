@@ -45,7 +45,7 @@ Desenvolvido por **LDZ**, com HTML, CSS e JavaScript puro. Não exige compilaç�
 
 1. Abra o site e permita acesso à localização.
 2. O navegador retorna uma coordenada; o site consulta o clima desse ponto.
-3. O cabeçalho mostra **Local atual (latitude, longitude)**. Em dispositivos com mouse, o título desse texto informa a precisão estimada pelo navegador.
+3. O cabeçalho mostra apenas **Local atual**. Coordenadas e precisão ficam ocultas; toque ou clique em **Mostrar localização** para consultar e em **Ocultar localização** para fechar.
 4. Se a localização falhar, pesquise uma cidade manualmente.
 
 A localização do computador pode ser estimada por rede/Wi-Fi e diferir da localização do celular. O site não força o uso de um sensor específico.
@@ -67,6 +67,7 @@ A localização do computador pode ser estimada por rede/Wi-Fi e diferir da loca
 | Clique fora da busca | Fecha as sugestões |
 | Meu Local | Solicita localização nova, sem aceitar posição em cache |
 | Atualizar | Recarrega a página e reinicia a localização automática |
+| Visual: leve / normal | Alterna os efeitos e cartões sem recarregar a previsão ou o radar |
 
 **Atenção:** o botão Atualizar recarrega a página inteira. A cidade escolhida manualmente não é salva entre recarregamentos.
 
@@ -153,7 +154,7 @@ A geolocalização utiliza `navigator.geolocation.getCurrentPosition` com:
 - O RainViewer é um site externo incorporado e pode carregar recursos próprios de terceiros; suas políticas se aplicam ao iframe.
 - Links externos abrem em outra aba com `rel="noopener noreferrer"`.
 
-O endpoint de busca do Open-Meteo não fornece geocodificação reversa em `/v1/reverse`. A tentativa anterior foi removida para evitar uma requisição que falhava. Por isso, na localização automática o site mostra coordenadas; o nome da cidade aparece quando ela é selecionada na busca.
+O endpoint de busca do Open-Meteo não fornece geocodificação reversa em `/v1/reverse`. A tentativa anterior foi removida para evitar uma requisição que falhava. Por isso, na localização automática o site mostra **Local atual**, com coordenadas em um controle fechado por padrão; o nome da cidade aparece quando ela é selecionada na busca. Abrir um novo GPS ou escolher uma cidade fecha e limpa os detalhes. Os números não aparecem em títulos de elementos nem em textos acessíveis enquanto o controle está fechado. O radar continua centralizado na localização consultada.
 
 ## Aparência e modo leve
 
@@ -178,7 +179,9 @@ O layout é responsivo. O modo leve é escolhido na abertura conforme a regra:
 | Brilho de sol/lua | Sombras | Sem sombras externas |
 | Radar | RainViewer automático | Mesmo RainViewer automático |
 
-A capacidade é uma **heurística**, não um benchmark. Largura de tela e processadores lógicos não medem diretamente GPU, memória ou desempenho. A regra é avaliada ao abrir a página; redimensionar ou girar o aparelho não muda o modo até recarregar.
+A capacidade é uma **heurística**, não um benchmark. Largura de tela e processadores lógicos não medem diretamente GPU, memória ou desempenho. A regra é avaliada ao abrir a página; redimensionar ou girar o aparelho não muda o modo automaticamente.
+
+O botão discreto **Visual: leve / normal**, abaixo de **Atualizar**, permite alternar os modos em qualquer dispositivo, incluindo iPhone e PC. A troca atualiza imediatamente os cartões e efeitos, preservando a cidade, os dados, o GPS e o radar. Os temporizadores são registrados uma única vez e verificam o modo ativo, evitando duplicação ao alternar. A escolha manual vale apenas para a página atual: ao recarregar, o site volta à escolha automática.
 
 Os elementos animados do fundo pausam quando a página fica oculta. O iframe externo tem seu próprio ciclo de execução, fora do controle do código local.
 
@@ -316,7 +319,9 @@ O teste inicia um servidor local temporário, simula as APIs e fecha o servidor 
 Cenários cobertos:
 
 - Desktop, perfil Android e perfil iPhone em Chromium.
-- Preservação do modo completo nos perfis Apple e modo leve no Android.
+- Escolha automática do modo completo nos perfis Apple e modo leve no Android.
+- Alternância manual nos dois sentidos, sem nova previsão ou recarga de radar.
+- Coordenadas ocultas por padrão, exibição explícita e ocultação ao trocar de localização.
 - Temperatura, chuva atual, probabilidade horária e 12 cartões.
 - Mesmo horário da cidade em fusos de dispositivo diferentes.
 - Ícone diurno após a passagem para o dia seguinte.
@@ -349,8 +354,8 @@ Os arquivos de produção ficam na raiz do repositório. Commits na branch confi
 O `index.html` carrega CSS e JavaScript com um identificador de versão:
 
 ```html
-<link rel="stylesheet" href="style.css?v=20261111-3">
-<script defer src="script.js?v=20261111-3"></script>
+<link rel="stylesheet" href="style.css?v=20261111-4">
+<script defer src="script.js?v=20261111-4"></script>
 ```
 
 Ao alterar os recursos, atualize esse identificador para evitar que navegadores reutilizem uma versão antiga. A publicação e a atualização dos caches não são instantâneas. O projeto não possui service worker.
@@ -365,7 +370,8 @@ Ao alterar os recursos, atualize esse identificador para evitar que navegadores 
 - Manter proteção contra respostas atrasadas ao mudar de cidade.
 - Não usar o fuso do aparelho para reinterpretar os horários civis retornados pela API.
 - Não transformar probabilidade futura em evidência de chuva atual.
-- Manter coordenadas visíveis no GPS para facilitar comparação entre aparelhos.
+- Manter coordenadas ocultas por padrão e permitir exibição apenas por ação do usuário.
+- Manter o modo automático na abertura e a opção manual sem recarga durante o uso.
 
 ### Antes de publicar
 
@@ -400,7 +406,7 @@ Ao alterar os recursos, atualize esse identificador para evitar que navegadores 
 | PC e celular discordam | Selecione a mesma cidade/estado/país, confira hora dos dados e coordenadas. Recarregue após a publicação. GPS pode retornar pontos distintos. |
 | GPS negado | Habilite permissão para o domínio ou use a busca manual. |
 | GPS indisponível ou lento | Confira serviços de localização, conexão e contexto HTTPS. Após 10 segundos há erro; a busca continua disponível. |
-| Nome aparece como coordenadas | É o comportamento do GPS; não existe serviço reverso válido configurado. Selecione a cidade na busca para exibir seu nome. |
+| Nome aparece como Local atual | É o comportamento do GPS; selecione a cidade na busca para exibir seu nome ou abra Mostrar localização para conferir as coordenadas. |
 | Sugestões não aparecem | Digite ao menos duas letras, aguarde 300 ms e confira conexão/bloqueios à API de geocodificação. |
 | Nenhum resultado | Tente o nome completo e confira acentuação, estado e país. Há cidades homônimas. |
 | Clima não atualiza | Confira conexão, aviso na interface e resposta de `api.open-meteo.com` na aba Network. Há timeout de 15 segundos. |
@@ -432,3 +438,4 @@ Para relatar um erro, informe navegador, sistema, cidade/estado/país, se foi GP
 - Links complementares: **CPTEC/INPE** e **IPMet**.
 
 Este README não concede uma licença de software. Não há arquivo `LICENSE` definido no repositório nesta revisão; uma licença explícita pode ser adicionada pelo responsável pelo projeto. Os dados e conteúdos externos continuam sujeitos às licenças e aos termos de seus respectivos provedores.
+

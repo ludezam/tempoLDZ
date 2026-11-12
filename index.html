@@ -5,16 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title> 🌤️ Tempo LDZ </title>
-    <link rel="stylesheet" href="style.css?v=20261111-2">
-    <script defer src="script.js?v=20261111-2"></script>
-    <style>
-        /* Cria um bloco invisível que pula da altura da tela */
-        .espaco-tela {
-            height: 100vh; 
-            width: 100vw;
-            background-color: transparent; /* Fica invisível */
-        }
-    </style>
+    <link rel="stylesheet" href="style.css?v=20261111-3">
+    <script defer src="script.js?v=20261111-3"></script>
 </head>
 
 <body>
@@ -23,7 +15,6 @@
     <div class="sun"></div>
     <div class="moon"></div>
     <div class="stars-layer" id="stars"></div>
-    <div class="shooting-stars" id="shootingStars"></div>
     <div class="cloud-layer cloud-back" id="cloudBack"></div>
     <div class="cloud-layer cloud-front" id="cloudFront"></div>
     <div class="fog-layer" id="fog"></div>
@@ -43,7 +34,7 @@
         <div class="temperatura-principal">
             <span id="tempAtual">--°</span>
         </div>
-        <div id="statusChuva" class="status">
+        <div id="statusChuva" class="status" role="status">
             Carregando clima...
         </div>
         <div class="descricao">
@@ -80,18 +71,14 @@
         <div class="radar-container">
             <iframe id="mapaRadar" title="Radar Meteorológico" allowfullscreen>
             </iframe>
-            <!-- BOTÃO TELA CHEIA - NÃO FUNCIONANDO
-		<button id="btnFullscreenRadar" class="btn-fullscreen" title="Abrir em tela cheia">
-                ⛶ Tela Cheia
-            </button> -->
         </div>
 
 		<a
-            href="https://www.cptec.inpe.br/dsat/" target="_blank" class="btn-ipmet">
+            href="https://www.cptec.inpe.br/dsat/" target="_blank" rel="noopener noreferrer" class="btn-ipmet">
             🛰️ Satélite GOES
         </a>
 		<a
-            href="https://www.ipmetradar.com.br/2mobileGis.php" target="_blank" class="btn-ipmet">
+            href="https://www.ipmetradar.com.br/2mobileGis.php" target="_blank" rel="noopener noreferrer" class="btn-ipmet">
             📡 Ver no IPMet
         </a>
     </section>
@@ -103,10 +90,13 @@
                 id="cidade"
                 type="text"
                 placeholder="Digite uma cidade"
-                autocomplete="off">
+                autocomplete="off"
+                aria-label="Buscar cidade"
+                aria-describedby="mensagemBusca">
             <!-- LISTA DE AUTOCOMPLETE -->
             <div id="listaCidades" class="lista-cidades"></div>
         </div>
+        <p id="mensagemBusca" role="status" aria-live="polite"></p>
         <button id="btnBuscar">
             🔎 Buscar Cidade
         </button>
@@ -153,27 +143,6 @@
             Dados fornecidos por Open-Meteo, RainViewer e IPMet
         </p>
     </footer>
-    
-	<!-- MODAL FULLSCREEN -->
-    <div id="modalFullscreen" class="modal-fullscreen">
-        <div class="modal-header">
-            <button id="btnFecharModal" class="btn-fechar-modal">✕</button>
-        </div>
-        <iframe id="radarFullscreen" class="radar-fullscreen" title="Radar em Tela Cheia"></iframe>
-    </div>
-	
-    <!-- ENTER PARA BUSCAR -->
-    <script>
-        document
-            .getElementById("cidade")
-            .addEventListener("keydown", function (e) {
-                if (e.key === "Enter") {
-                    e.preventDefault();
-                    document
-                        .getElementById("btnBuscar")
-                        .click();
-                }
-            });
-    </script>
 </body>
 </html>
+

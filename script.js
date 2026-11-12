@@ -10,9 +10,18 @@ const $ = id => document.getElementById(id);
 ===================================================== */
 let LAT = null;
 let LON = null;
-let timezoneAtual = "";
 let versaoLocalizacao = 0;
 let versaoConsultaClima = 0;
+let consultaClimaAtiva;
+let ultimaAtualizacao = 0;
+const INTERVALO_CLIMA = 300000;
+const CODIGOS_CHUVA = [51, 53, 55, 56, 57, 61, 63, 65, 66, 67, 80, 81, 82, 95, 96, 99];
+
+// Datas da API são horários civis da cidade, sem offset. UTC aqui serve apenas
+// como base de comparação, impedindo interferência do fuso do dispositivo.
+const dataCidade = valor => new Date(`${valor}Z`);
+const horarioEmMinutos = valor => Number(valor.slice(11, 13)) * 60 + Number(valor.slice(14, 16));
+const choveAgora = () => climaAtual.chuva > 0 || CODIGOS_CHUVA.includes(climaAtual.weatherCode);
 
 // Mantém o critério anterior e aplica o modo leve a todos os efeitos locais.
 const dispositivoAppleMovel = /iPhone|iPad|iPod/.test(navigator.userAgent) ||
@@ -43,26 +52,16 @@ let climaAtual = {
 function obterHoraCidade() {
     if (!climaAtual.horarioLocal)
         return new Date();
-    return new Date(climaAtual.horarioLocal);
+    return dataCidade(climaAtual.horarioLocal);
 }
 
 /* =====================================================
    CALCULA POSIÇÃO NO CICLO DIA/NOITE
 ===================================================== */
-function ehDiaHorario(hora) {
-
-    const horario = new Date(hora);
-
-    const nascer = new Date(climaAtual.sunrise);
-    const por = new Date(climaAtual.sunset);
-
-    return horario >= nascer && horario <= por;
-}
-
 function calcularPosicaoDiaNoite() {
     const agora = obterHoraCidade().getTime();
-    const nascer = new Date(climaAtual.sunrise).getTime();
-    const por = new Date(climaAtual.sunset).getTime();
+    const nascer = dataCidade(climaAtual.sunrise).getTime();
+    const por = dataCidade(climaAtual.sunset).getTime();
 
     if (agora >= nascer && agora <= por) {
         // Durante o dia: calcula progresso de 0 a 1
@@ -96,41 +95,6 @@ function calcularPosicaoDiaNoite() {
 /* =====================================================
    GEOLOCALIZAÇÃO
 ===================================================== */
-async function atualizarNomeCidade(versao) {
-    console.log("🔍 Iniciando atualizarNomeCidade com LAT:", LAT, "LON:", LON);
-    try {
-        const url = `https://geocoding-api.open-meteo.com/v1/reverse?latitude=${LAT}&longitude=${LON}&language=pt`;
-        console.log("📍 URL de reverse geocoding:", url);
-
-        const resposta = await fetch(url);
-
-        if (!resposta.ok) {
-            console.error("❌ Erro HTTP:", resposta.status);
-            throw new Error(`Erro HTTP ${resposta.status}`);
-        }
-        const dados = await resposta.json();
-        if (versao !== versaoLocalizacao) return;
-        console.log("✅ Reverse Geocoding OK:", dados);
-
-        if (dados.results && dados.results.length > 0) {
-            const local = dados.results[0];
-            const cidade = local.name || "";
-            const estado = local.admin1 || "";
-
-            console.log("🏙️ Cidade encontrada:", cidade, estado);
-            $("cidadeAtual").textContent = [cidade, estado].filter(Boolean).join(", ");
-        } else {
-            console.warn("⚠️ Nenhum resultado de geocoding");
-            $("cidadeAtual").textContent = `${LAT.toFixed(2)}, ${LON.toFixed(2)}`;
-        }
-    }
-    catch (erro) {
-        if (versao !== versaoLocalizacao) return;
-        console.error("❌ Erro ao obter cidade:", erro);
-        $("cidadeAtual").textContent = "Local atual";
-    }
-}
-
 function iniciarGPS(forcarAtualizacao = false) {
     const versao = ++versaoLocalizacao;
     $("cidadeAtual").textContent =
@@ -145,23 +109,25 @@ function iniciarGPS(forcarAtualizacao = false) {
             if (versao !== versaoLocalizacao) return;
             LAT = pos.coords.latitude;
             LON = pos.coords.longitude;
-            console.log("LAT:", LAT);
-            console.log("LON:", LON);
-
-            // O nome da cidade não bloqueia a previsão nem o radar.
+            // A API de busca não oferece geocodificação reversa neste endpoint.
+            $("cidadeAtual").textContent = `Local atual (${LAT.toFixed(3)}, ${LON.toFixed(3)})`;
+            $("cidadeAtual").title = `Precisão estimada: ${Math.round(pos.coords.accuracy || 0)} m`;
             atualizarClima();
-            atualizarNomeCidade(versao);
         },
         erro => {
             if (versao !== versaoLocalizacao) return;
             console.error("Erro GPS:", erro);
-            $("cidadeAtual").textContent =
-                "Permissão negada";
+            const mensagens = {
+                1: "Permissão de localização negada. Busque uma cidade.",
+                2: "Localização indisponível. Busque uma cidade.",
+                3: "Tempo de localização esgotado. Tente novamente ou busque uma cidade."
+            };
+            $("cidadeAtual").textContent = mensagens[erro.code] || "Não foi possível localizar. Busque uma cidade.";
         },
         {
             enableHighAccuracy: true,
             timeout: 10000,
-            maximumAge: forcarAtualizacao ? 0 : 300000
+            maximumAge: forcarAtualizacao ? 0 : INTERVALO_CLIMA
         }
     );
 }
@@ -176,34 +142,39 @@ async function atualizarClima() {
     const localizacao = versaoLocalizacao;
     const latitude = LAT;
     const longitude = LON;
+    if (consultaClimaAtiva) consultaClimaAtiva.abort();
+    const controlador = new AbortController();
+    consultaClimaAtiva = controlador;
+    const limite = setTimeout(() => controlador.abort(), 15000);
+    $("statusChuva").textContent = "Atualizando clima...";
     try {
-        const url = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,apparent_temperature,precipitation,wind_speed_10m,wind_direction_10m,relative_humidity_2m,cloud_cover,weather_code&daily=sunrise,sunset&hourly=temperature_2m,precipitation_probability,precipitation,weather_code&timezone=auto`;
-        const resposta = await fetch(url, { cache: "no-store" });
+        const url = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,apparent_temperature,precipitation,wind_speed_10m,wind_direction_10m,relative_humidity_2m,cloud_cover,weather_code&daily=sunrise,sunset&hourly=temperature_2m,precipitation_probability,precipitation,weather_code&timezone=auto&forecast_days=2`;
+        const resposta = await fetch(url, { cache: "no-store", signal: controlador.signal });
         if (!resposta.ok) throw new Error(`Erro HTTP ${resposta.status}`);
         const dados = await resposta.json();
         // Ignora respostas de outra cidade ou de uma atualização anterior.
         if (consulta !== versaoConsultaClima || localizacao !== versaoLocalizacao ||
             latitude !== LAT || longitude !== LON) return;
-		console.log("URL:", url);
-		console.log("Resposta Raw:", dados);
-
-        timezoneAtual = dados.timezone;
+        if (!dados.current || !dados.hourly?.time?.length || !dados.daily?.sunrise?.length) {
+            throw new Error("Resposta meteorológica incompleta");
+        }
+        const horaAtual = dados.current.time.slice(0, 13);
+        const indiceAtual = dados.hourly.time.findIndex(hora => hora.slice(0, 13) === horaAtual);
         climaAtual.temperatura = dados.current.temperature_2m;
         climaAtual.sensacao = dados.current.apparent_temperature;
         climaAtual.umidade = dados.current.relative_humidity_2m;
         climaAtual.vento = dados.current.wind_speed_10m;
         climaAtual.direcaoVento = dados.current.wind_direction_10m || 0;
         climaAtual.chuva = dados.current.precipitation;
-        climaAtual.probabilidade = dados.current.precipitation_probability;
+        climaAtual.probabilidade = dados.hourly.precipitation_probability[indiceAtual] ?? 0;
         climaAtual.cloudCover = dados.current.cloud_cover;
         climaAtual.weatherCode = dados.current.weather_code;
         climaAtual.sunrise = dados.daily.sunrise[0];
         climaAtual.sunset = dados.daily.sunset[0];
         climaAtual.horarioLocal = dados.current.time;
 
-		atualizarInterface();
         atualizarMapa();
-        renderizar12Horas(dados.hourly);
+        renderizar12Horas(dados.hourly, dados.daily);
         atualizarDescricao(dados.hourly);
         atualizarCeu();
         atualizarSolLua();
@@ -211,9 +182,15 @@ async function atualizarClima() {
         atualizarChuva();
         atualizarNeblina();
         atualizarEstrelas();
+        ultimaAtualizacao = Date.now();
     }
     catch (erro) {
-        console.error(erro);
+        if (consulta !== versaoConsultaClima || localizacao !== versaoLocalizacao) return;
+        console.error("Falha ao atualizar clima:", erro);
+        $("statusChuva").textContent = "Não foi possível atualizar. Os dados exibidos podem estar desatualizados.";
+    } finally {
+        clearTimeout(limite);
+        if (consultaClimaAtiva === controlador) consultaClimaAtiva = null;
     }
 }
 
@@ -223,12 +200,7 @@ async function atualizarClima() {
 function atualizarInterface() {
     $("tempAtual").textContent = Math.round(climaAtual.temperatura) + "°";
     $("sensacaoAtual").textContent = Math.round(climaAtual.sensacao) + "°";
-		const cardSensacao = $("sensacaoAtual").closest(".item");
-		cardSensacao.classList.remove("calor-extremo");
-
-		if(climaAtual.sensacao >= 38){
-			cardSensacao.classList.add("calor-extremo");
-		}
+    $("sensacaoAtual").closest(".item").classList.toggle("calor-extremo", climaAtual.sensacao >= 38);
     $("umidadeAtual").textContent = climaAtual.umidade + "%";
     $("ventoAtual").textContent = Math.round(climaAtual.vento) + " km/h";
 
@@ -254,6 +226,9 @@ function atualizarInterface() {
     if (climaAtual.chuva > 0.5) {
         $("statusChuva").textContent = "🔴 Chuva Forte";
     }
+    else if (choveAgora()) {
+        $("statusChuva").textContent = "🌧️ Chovendo agora";
+    }
     else if (climaAtual.probabilidade > 40) {
         $("statusChuva").textContent = "🟡 Chuva Chegando";
     }
@@ -270,37 +245,30 @@ function atualizarInterface() {
 ===================================================== */
 function atualizarDescricao(h) {
 
-    const agora = new Date(climaAtual.horarioLocal);
+    const agora = dataCidade(climaAtual.horarioLocal);
 
     let inicio = h.time.findIndex(t =>
-        new Date(t) >= agora
+        dataCidade(t) >= agora
     );
 
     if (inicio < 0) inicio = 0;
 
     let chuvaTotal = 0;
     let horasComChuva = 0;
-    let primeiraHoraComChuva = -1;
 
     for (let i = inicio; i < inicio + 12; i++) {
 
         const prob = h.precipitation_probability[i] ?? 0;
         const amount = h.precipitation[i] ?? 0;
 
-        if (prob > 10 || amount > 0.1) {
-
-            chuvaTotal += amount;
-            horasComChuva++;
-
-            if (primeiraHoraComChuva === -1) {
-                primeiraHoraComChuva = i - inicio;
-            }
-        }
+        chuvaTotal += amount;
+        if (prob > 10 || amount > 0.1) horasComChuva++;
     }
 
-    if (horasComChuva > 0) {
+    if (horasComChuva > 0 || chuvaTotal > 0) {
         $('descricaoAtual').textContent =
-            `🌧️ Chuva de ${chuvaTotal.toFixed(1)}mm nas próximas ${horasComChuva}h`;
+            `🌧️ ${chuvaTotal.toFixed(1)} mm previstos nas próximas 12 horas` +
+            (horasComChuva > 0 ? `; possibilidade de chuva em ${horasComChuva} dessas horas` : "");
 
         climaAtual.proximaChuva = true;
     } else {
@@ -317,7 +285,8 @@ function atualizarDescricao(h) {
    RADAR
 ===================================================== */
 function atualizarMapa() {
-    $("mapaRadar").src = `https://www.rainviewer.com/map.html?loc=${LAT},${LON},10&oFa=0&layer=radar`;
+    const url = `https://www.rainviewer.com/map.html?loc=${LAT},${LON},10&oFa=0&layer=radar`;
+    if ($("mapaRadar").getAttribute("src") !== url) $("mapaRadar").src = url;
 }
 
 /* =====================================================
@@ -336,9 +305,9 @@ campoCidade.setAttribute("aria-autocomplete", "list");
 campoCidade.setAttribute("aria-controls", "listaCidades");
 campoCidade.setAttribute("aria-expanded", "false");
 listaCidades.setAttribute("role", "listbox");
-listaCidades.style.overflowY = "auto";
 
 function fecharSugestoes() {
+    $("mensagemBusca").textContent = "";
     clearTimeout(timerSugestoes);
     if (pedidoSugestoes) pedidoSugestoes.abort();
     ++versaoSugestoes;
@@ -356,6 +325,7 @@ function selecionarCidade(local) {
     LAT = local.latitude;
     LON = local.longitude;
     campoCidade.value = local.name;
+    $("cidadeAtual").removeAttribute("title");
     $("cidadeAtual").textContent = [local.name, local.admin1, local.country]
         .filter(Boolean).join(", ");
     atualizarClima();
@@ -373,8 +343,10 @@ async function buscarCidade() {
         const dados = await resposta.json();
         if (versao !== versaoSugestoes || campoCidade.value.trim() !== nome) return;
         if (dados.results?.length) selecionarCidade(dados.results[0]);
+        else $("mensagemBusca").textContent = "Nenhuma cidade encontrada. Confira o nome e tente novamente.";
     } catch (erro) {
         console.error("Erro ao buscar cidade:", erro);
+        if (versao === versaoSugestoes) $("mensagemBusca").textContent = "Não foi possível buscar cidades. Tente novamente.";
     }
 }
 
@@ -391,6 +363,7 @@ campoCidade.addEventListener("input", () => {
             const dados = await resposta.json();
             if (versao !== versaoSugestoes) return;
             sugestoes = dados.results || [];
+            if (!sugestoes.length) $("mensagemBusca").textContent = "Nenhuma cidade encontrada.";
             sugestoes.forEach((local, i) => {
                 const item = document.createElement("div");
                 item.className = "cidade-item";
@@ -410,25 +383,29 @@ campoCidade.addEventListener("input", () => {
             listaCidades.classList.toggle("ativo", sugestoes.length > 0);
             campoCidade.setAttribute("aria-expanded", String(sugestoes.length > 0));
         } catch (erro) {
-            if (erro.name !== "AbortError") console.error("Erro nas sugestões:", erro);
+            if (erro.name !== "AbortError" && versao === versaoSugestoes) {
+                console.error("Erro nas sugestões:", erro);
+                $("mensagemBusca").textContent = "Sugestões indisponíveis. Tente buscar novamente.";
+            }
         }
     }, 300);
 });
 
-// Captura Enter antes do manipulador existente no HTML para evitar busca dupla.
 campoCidade.addEventListener("keydown", e => {
     if (e.isComposing) return;
     if (e.key === "Tab") { fecharSugestoes(); return; }
     if (e.key === "Escape") { fecharSugestoes(); return; }
-    if (e.key === "Enter" && indiceSugestao >= 0) {
+    if (e.key === "Enter") {
         e.preventDefault();
-        e.stopImmediatePropagation();
-        selecionarCidade(sugestoes[indiceSugestao]);
+        if (indiceSugestao >= 0) selecionarCidade(sugestoes[indiceSugestao]);
+        else buscarCidade();
         return;
     }
     if (!["ArrowDown", "ArrowUp"].includes(e.key) || !sugestoes.length) return;
     e.preventDefault();
-    indiceSugestao = (indiceSugestao + (e.key === "ArrowDown" ? 1 : -1) + sugestoes.length) % sugestoes.length;
+    indiceSugestao = indiceSugestao < 0
+        ? (e.key === "ArrowDown" ? 0 : sugestoes.length - 1)
+        : (indiceSugestao + (e.key === "ArrowDown" ? 1 : -1) + sugestoes.length) % sugestoes.length;
     Array.from(listaCidades.children).forEach((item, i) => {
         item.classList.toggle("destaque", i === indiceSugestao);
         item.setAttribute("aria-selected", String(i === indiceSugestao));
@@ -436,7 +413,7 @@ campoCidade.addEventListener("keydown", e => {
     const ativo = listaCidades.children[indiceSugestao];
     campoCidade.setAttribute("aria-activedescendant", ativo.id);
     ativo.scrollIntoView({ block: "nearest" });
-}, true);
+});
 
 document.addEventListener("click", e => {
     if (!campoCidade.parentElement.contains(e.target) && !$("btnBuscar").contains(e.target)) fecharSugestoes();
@@ -548,14 +525,14 @@ function atualizarCeu() {
 function atualizarFaseVisualLua() {
     const moon = document.querySelector(".moon");
 
-	const hoje = climaAtual.horarioLocal ? new Date(climaAtual.horarioLocal) : new Date();
+	const hoje = climaAtual.horarioLocal ? dataCidade(climaAtual.horarioLocal) : new Date();
 	const referencia = new Date("2024-01-11");
     const dias = (hoje - referencia) / 86400000;
     const ciclo = ((dias % 29.53) + 29.53) % 29.53;
     const fase = ciclo / 29.53;
     const iluminacao = (1 - Math.cos(fase * 2 * Math.PI)) / 2;
 
-    let deslocamento = iluminacao * 110;
+    const deslocamento = iluminacao * 110;
 
     moon.style.setProperty(
         "--fase-lua",
@@ -600,7 +577,6 @@ function atualizarSolLua() {
 
         moon.style.left = x + "vw";
         moon.style.top = y + "vh";
-		atualizarFaseVisualLua();
         moon.style.opacity = Math.max(0.15, 0.85 - (cloudFactor * 0.6));
         sun.style.opacity = 0;
     }
@@ -615,6 +591,8 @@ function gerarEstrelas() {
     const layer = $("stars");
     layer.innerHTML = "";
     const total = modoLeve ? 120 : 350;
+    const fragmento = document.createDocumentFragment();
+    const cores = ["#ffffff", "#fff4d6", "#ffe7b3", "#dcecff", "#e8f2ff"];
 
 
     for (let i = 0; i < total; i++) {
@@ -629,19 +607,12 @@ function gerarEstrelas() {
         star.style.animationDuration = (1 + Math.random() * 4) + "s";
         star.style.opacity = 0.3 + Math.random() * 0.7;
 
-		const cores = [
-			"#ffffff", // branca
-			"#fff4d6", // amarelada
-			"#ffe7b3", // dourada suave
-			"#dcecff", // azulada
-			"#e8f2ff"  // azul clara
-		];
-
 		star.style.background =
 		cores[Math.floor(Math.random() * cores.length)];
 
-        layer.appendChild(star);
+        fragmento.appendChild(star);
     }
+    layer.appendChild(fragmento);
     estrelasCriadas = true;
 }
 
@@ -672,7 +643,7 @@ function atualizarEstrelas() {
    ESTRELA CADENTE
 ===================================================== */
 function criarEstrelaCadente() {
-    if (modoLeve) return;
+    if (modoLeve || document.hidden) return;
 
     if (climaAtual.cloudCover > 25)
         return;
@@ -691,8 +662,8 @@ function criarEstrelaCadente() {
     }, 2500);
 }
 
-setInterval(() => {
-    if (modoLeve) return;
+if (!modoLeve) setInterval(() => {
+    if (document.hidden || !climaAtual.sunrise) return;
     const ciclo = calcularPosicaoDiaNoite();
     if (ciclo.ehDia)
         return;
@@ -710,6 +681,7 @@ setInterval(() => {
    LOOP VISUAL
 ===================================================== */
 setInterval(() => {
+    if (document.hidden || !climaAtual.sunrise) return;
     atualizarCeu();
     atualizarSolLua();
     atualizarEstrelas();
@@ -726,7 +698,8 @@ function atualizarNuvens() {
     back.innerHTML = "";
     front.innerHTML = "";
 
-    const quantidade = Math.max(2, Math.round(climaAtual.cloudCover / (modoLeve ? 20 : 4)));
+    if (modoLeve) return; // As camadas estão ocultas por CSS.
+    const quantidade = Math.max(2, Math.round(climaAtual.cloudCover / 4));
     for (let i = 0; i < quantidade; i++) {
         criarNuvem(back, false);
     }
@@ -755,7 +728,7 @@ function criarNuvem(layer, frontal) {
     
     // ✅ Aplicar ambos os valores CSS
     cloud.style.setProperty('--ventoY', `${ventoY}px`);
-	cloud.style.animation = `cloudMove ${ velocidadeBase - vento }s linear infinite`;
+	cloud.style.animation = `cloudMove ${ Math.max(15, velocidadeBase - vento) }s linear infinite`;
 
     cloud.style.opacity = frontal ? 0.55 : 0.35;
     layer.appendChild(cloud);
@@ -768,45 +741,14 @@ function atualizarChuva() {
     const rain = $("rain");
     rain.innerHTML = "";
 
-    // Verifica se há chuva:
-    // 1. Se precipitation > 0 (chovendo agora)
-    // 2. OU se precipitation_probability > 15% (alta chance)
-    // 3. OU se weather code indica chuva/tempestade
-    const temChuvaAgora = climaAtual.chuva > 0;
-    const altaProbabilidade = climaAtual.probabilidade > 15;
-    const ehChuvaCodigo = [
-        51, 53, 55, 56, 57,  // Garoa
-        61, 63, 65, 66, 67,  // Chuva
-        80, 81, 82,          // Chuva por pancada
-        95, 96, 99           // Tempestade
-    ].includes(climaAtual.weatherCode);
-
-    if (!temChuvaAgora && !altaProbabilidade && !ehChuvaCodigo) {
-        return;  // Nenhuma chuva esperada
-    }
-
-    // Calcula quantidade de gotas com base em:
-    // - Precipitação atual (mais forte = mais gotas)
-    // - Probabilidade
-    // - Weather code
-    let quantidade = 0;
-
-    if (temChuvaAgora) {
-        // Se está chovendo, quantidade baseada na precipitação em mm
-        // 1mm = ~80 gotas, 2mm = ~150, 5mm = ~250
-        quantidade = Math.min(300, Math.max(100, climaAtual.chuva * 60));
-    } else if (altaProbabilidade) {
-        // Se há alta probabilidade, escala com a probabilidade
-        // 15% = 60 gotas, 50% = 200 gotas, 100% = 300 gotas
-        quantidade = Math.min(300, Math.max(60, climaAtual.probabilidade * 4));
-    } else if (ehChuvaCodigo) {
-        // Se é um código de chuva mas sem probabilidade/precipitação clara
-        quantidade = Math.min(250, Math.max(120, climaAtual.probabilidade * 3 + 80));
-    }
+    // Probabilidade horária não significa que esteja chovendo agora.
+    if (!choveAgora()) return;
+    let quantidade = climaAtual.chuva > 0
+        ? Math.min(300, Math.max(100, climaAtual.chuva * 60))
+        : 120;
 
     if (modoLeve) quantidade = Math.min(50, quantidade);
 
-    console.log(`🌧️ Chuva renderizada: ${Math.round(quantidade)} gotas (chuva: ${climaAtual.chuva}mm, prob: ${climaAtual.probabilidade}%, código: ${climaAtual.weatherCode})`);
 
     for (let i = 0; i < quantidade; i++) {
 
@@ -862,6 +804,7 @@ function atualizarNeblina() {
 function iniciarRelampagos() {
     if (modoLeve) return;
     setInterval(() => {
+        if (document.hidden) return;
         if (
             climaAtual.weatherCode !== 95 &&
             climaAtual.weatherCode !== 96 &&
@@ -905,9 +848,9 @@ function atualizarSetaVento() {
 /* =====================================================
    FASE DA LUA - OBTER ÍCONE 
 ===================================================== */
-function obterFaseLua() {
+function obterFaseLua(hora) {
 
-    const hoje = new Date();
+    const hoje = hora ? dataCidade(hora) : obterHoraCidade();
     const referencia = new Date("2024-01-11");
     const dias = (hoje - referencia) / 86400000;
     const ciclo = ((dias % 29.53) + 29.53) % 29.53;
@@ -926,13 +869,13 @@ function obterFaseLua() {
 /* =====================================================
    WEATHER CODE → ÍCONE
 ===================================================== */
-function obterIcone(codigo, ehDia) {
+function obterIcone(codigo, ehDia, hora) {
 
     // Céu limpo
-    if (codigo === 0) return ehDia ? "☀️" : obterFaseLua();
+    if (codigo === 0) return ehDia ? "☀️" : obterFaseLua(hora);
 	
     // Poucas nuvens
-    if ([1, 2].includes(codigo)) return ehDia ? "🌤️" : `${obterFaseLua()}☁️`;
+    if ([1, 2].includes(codigo)) return ehDia ? "🌤️" : `${obterFaseLua(hora)}☁️`;
 
     // Nublado
     if (codigo === 3) return "☁️";
@@ -960,12 +903,12 @@ function obterIcone(codigo, ehDia) {
 /* =====================================================
    PREVISÃO 12H (COM DADOS DE PRECIPITAÇÃO)
 ===================================================== */
-function renderizar12Horas(hourly) {
+function renderizar12Horas(hourly, daily) {
     const container = $("previsao12h");
-    const agora = new Date(climaAtual.horarioLocal);
+    const agora = dataCidade(climaAtual.horarioLocal);
 
     let inicio = hourly.time.findIndex(t => {
-        return new Date(t) >= agora;
+        return dataCidade(t) >= agora;
     });
     if (inicio < 0)
         inicio = 0;
@@ -975,22 +918,17 @@ function renderizar12Horas(hourly) {
 
         if (!hora) continue;
         const temp = Math.round(hourly.temperature_2m[i]);
-        const prob = hourly.precipitation_probability[i];
+        const prob = hourly.precipitation_probability[i] ?? 0;
         const precip = hourly.precipitation[i] || 0;
         const codigo = hourly.weather_code[i];
 		
-        // nova função ehDia 
-        const horaCard = new Date(hora).getHours();
-        const horaNascer =
-            new Date(climaAtual.sunrise).getHours();
-        const horaPor =
-            new Date(climaAtual.sunset).getHours();
-        const ehDia =
-            horaCard >= horaNascer &&
-            horaCard < horaPor;
-
-        const icone =
-            obterIcone(codigo, ehDia);
+        const indiceDia = daily.time.indexOf(hora.slice(0, 10));
+        const nascer = daily.sunrise[indiceDia];
+        const por = daily.sunset[indiceDia];
+        const minutos = horarioEmMinutos(hora);
+        const ehDia = Boolean(nascer && por) &&
+            minutos >= horarioEmMinutos(nascer) && minutos <= horarioEmMinutos(por);
+        const icone = obterIcone(codigo, ehDia, hora);
 
         // Formatar informação de chuva
         let infoChuvaCard = "";
@@ -1039,12 +977,13 @@ $('btnRefresh').addEventListener('click', () => { window.location.reload(); });
 ===================================================== */
 
 setInterval(() => {
-    atualizarClima();
-}, 300000); // 5 min
+    if (!document.hidden) atualizarClima();
+}, INTERVALO_CLIMA);
 
-setInterval(() => {
-    atualizarEstrelas();
-}, 60000); // 1 min
+document.addEventListener("visibilitychange", () => {
+    document.documentElement.classList.toggle("pagina-oculta", document.hidden);
+    if (!document.hidden && Date.now() - ultimaAtualizacao >= INTERVALO_CLIMA) atualizarClima();
+});
 
 /* =====================================================
    INICIALIZAÇÃO
@@ -1052,14 +991,9 @@ setInterval(() => {
 
 function iniciarSistema() {
     iniciarGPS();
-    gerarEstrelas();
     atualizarEstrelas();
     iniciarRelampagos();
 
 }
 iniciarSistema();
 });
-
-
-
-

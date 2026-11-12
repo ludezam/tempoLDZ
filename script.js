@@ -11,6 +11,11 @@ const $ = id => document.getElementById(id);
 let LAT = null;
 let LON = null;
 let timezoneAtual = "";
+let versaoLocalizacao = 0;
+
+// Mantém o critério anterior e aplica o modo leve a todos os efeitos locais.
+const modoLeve = window.innerWidth < 700 || navigator.hardwareConcurrency <= 4;
+document.documentElement.classList.toggle("modo-leve", modoLeve);
 
 let climaAtual = {
     temperatura: 0,
@@ -87,7 +92,7 @@ function calcularPosicaoDiaNoite() {
 /* =====================================================
    GEOLOCALIZAÇÃO
 ===================================================== */
-async function atualizarNomeCidade() {
+async function atualizarNomeCidade(versao) {
     console.log("🔍 Iniciando atualizarNomeCidade com LAT:", LAT, "LON:", LON);
     try {
         const url = `https://geocoding-api.open-meteo.com/v1/reverse?latitude=${LAT}&longitude=${LON}&language=pt`;
@@ -100,6 +105,7 @@ async function atualizarNomeCidade() {
             throw new Error(`Erro HTTP ${resposta.status}`);
         }
         const dados = await resposta.json();
+        if (versao !== versaoLocalizacao) return;
         console.log("✅ Reverse Geocoding OK:", dados);
 
         if (dados.results && dados.results.length > 0) {
@@ -115,12 +121,14 @@ async function atualizarNomeCidade() {
         }
     }
     catch (erro) {
+        if (versao !== versaoLocalizacao) return;
         console.error("❌ Erro ao obter cidade:", erro);
         $("cidadeAtual").textContent = "Local atual";
     }
 }
 
-function iniciarGPS() {
+function iniciarGPS(forcarAtualizacao = false) {
+    const versao = ++versaoLocalizacao;
     $("cidadeAtual").textContent =
         "Buscando localização...";
     if (!navigator.geolocation) {
@@ -129,16 +137,19 @@ function iniciarGPS() {
         return;
     }
     navigator.geolocation.getCurrentPosition(
-        async pos => {
+        pos => {
+            if (versao !== versaoLocalizacao) return;
             LAT = pos.coords.latitude;
             LON = pos.coords.longitude;
             console.log("LAT:", LAT);
             console.log("LON:", LON);
 
-            await atualizarNomeCidade();
-            await atualizarClima();
+            // O nome da cidade não bloqueia a previsão nem o radar.
+            atualizarClima();
+            atualizarNomeCidade(versao);
         },
         erro => {
+            if (versao !== versaoLocalizacao) return;
             console.error("Erro GPS:", erro);
             $("cidadeAtual").textContent =
                 "Permissão negada";
@@ -146,7 +157,7 @@ function iniciarGPS() {
         {
             enableHighAccuracy: true,
             timeout: 10000,
-            maximumAge: 0
+            maximumAge: forcarAtualizacao ? 0 : 300000
         }
     );
 }
@@ -310,6 +321,7 @@ async function buscarCidade() {
 
     if (!dados.results?.length)
         return;
+    ++versaoLocalizacao;
     LAT = dados.results[0].latitude;
     LON = dados.results[0].longitude;
 
@@ -319,7 +331,7 @@ async function buscarCidade() {
 }
 
 function usarGPS() {
-    iniciarGPS();
+    iniciarGPS(true);
 }
 
 /* =====================================================
@@ -490,11 +502,7 @@ let estrelasCriadas = false;
 function gerarEstrelas() {
     const layer = $("stars");
     layer.innerHTML = "";
-    const total =
-    (window.innerWidth < 700 ||
-     navigator.hardwareConcurrency <= 4)
-        ? 120
-        : 350;
+    const total = modoLeve ? 120 : 350;
 
 
     for (let i = 0; i < total; i++) {
@@ -552,6 +560,7 @@ function atualizarEstrelas() {
    ESTRELA CADENTE
 ===================================================== */
 function criarEstrelaCadente() {
+    if (modoLeve) return;
 
     if (climaAtual.cloudCover > 25)
         return;
@@ -571,6 +580,7 @@ function criarEstrelaCadente() {
 }
 
 setInterval(() => {
+    if (modoLeve) return;
     const ciclo = calcularPosicaoDiaNoite();
     if (ciclo.ehDia)
         return;
@@ -604,7 +614,7 @@ function atualizarNuvens() {
     back.innerHTML = "";
     front.innerHTML = "";
 
-    const quantidade = Math.max(2, Math.round(climaAtual.cloudCover / 4));
+    const quantidade = Math.max(2, Math.round(climaAtual.cloudCover / (modoLeve ? 20 : 4)));
     for (let i = 0; i < quantidade; i++) {
         criarNuvem(back, false);
     }
@@ -682,6 +692,8 @@ function atualizarChuva() {
         quantidade = Math.min(250, Math.max(120, climaAtual.probabilidade * 3 + 80));
     }
 
+    if (modoLeve) quantidade = Math.min(50, quantidade);
+
     console.log(`🌧️ Chuva renderizada: ${Math.round(quantidade)} gotas (chuva: ${climaAtual.chuva}mm, prob: ${climaAtual.probabilidade}%, código: ${climaAtual.weatherCode})`);
 
     for (let i = 0; i < quantidade; i++) {
@@ -736,6 +748,7 @@ function atualizarNeblina() {
    RELÂMPAGOS
 ===================================================== */
 function iniciarRelampagos() {
+    if (modoLeve) return;
     setInterval(() => {
         if (
             climaAtual.weatherCode !== 95 &&
@@ -934,3 +947,4 @@ function iniciarSistema() {
 }
 iniciarSistema();
 });
+

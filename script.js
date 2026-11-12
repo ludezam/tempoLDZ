@@ -311,24 +311,124 @@ function atualizarMapa() {
 /* =====================================================
    BUSCA DE CIDADE
 ===================================================== */
-async function buscarCidade() {
-    const nome = $("cidade").value.trim();
+const campoCidade = $("cidade");
+const listaCidades = $("listaCidades");
+let sugestoes = [];
+let indiceSugestao = -1;
+let timerSugestoes;
+let pedidoSugestoes;
+let versaoSugestoes = 0;
 
-    if (!nome) return;
-    const url = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(nome)}&count=1&language=pt`;
-    const resposta = await fetch(url);
-    const dados = await resposta.json();
+campoCidade.setAttribute("role", "combobox");
+campoCidade.setAttribute("aria-autocomplete", "list");
+campoCidade.setAttribute("aria-controls", "listaCidades");
+campoCidade.setAttribute("aria-expanded", "false");
+listaCidades.setAttribute("role", "listbox");
+listaCidades.style.overflowY = "auto";
 
-    if (!dados.results?.length)
-        return;
+function fecharSugestoes() {
+    clearTimeout(timerSugestoes);
+    if (pedidoSugestoes) pedidoSugestoes.abort();
+    ++versaoSugestoes;
+    sugestoes = [];
+    indiceSugestao = -1;
+    listaCidades.replaceChildren();
+    listaCidades.classList.remove("ativo");
+    campoCidade.setAttribute("aria-expanded", "false");
+    campoCidade.removeAttribute("aria-activedescendant");
+}
+
+function selecionarCidade(local) {
+    fecharSugestoes();
     ++versaoLocalizacao;
-    LAT = dados.results[0].latitude;
-    LON = dados.results[0].longitude;
-
-    $("cidadeAtual").textContent = dados.results[0].name;
+    LAT = local.latitude;
+    LON = local.longitude;
+    campoCidade.value = local.name;
+    $("cidadeAtual").textContent = [local.name, local.admin1, local.country]
+        .filter(Boolean).join(", ");
     atualizarClima();
     atualizarEstrelas();
 }
+
+async function buscarCidade() {
+    const nome = campoCidade.value.trim();
+    if (!nome) return;
+    fecharSugestoes();
+    const versao = versaoSugestoes;
+    try {
+        const resposta = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(nome)}&count=1&language=pt`);
+        if (!resposta.ok) throw new Error("Falha na busca de cidade");
+        const dados = await resposta.json();
+        if (versao !== versaoSugestoes || campoCidade.value.trim() !== nome) return;
+        if (dados.results?.length) selecionarCidade(dados.results[0]);
+    } catch (erro) {
+        console.error("Erro ao buscar cidade:", erro);
+    }
+}
+
+campoCidade.addEventListener("input", () => {
+    fecharSugestoes();
+    const nome = campoCidade.value.trim();
+    if (nome.length < 2) return;
+    const versao = versaoSugestoes;
+    timerSugestoes = setTimeout(async () => {
+        pedidoSugestoes = new AbortController();
+        try {
+            const resposta = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(nome)}&count=8&language=pt`, { signal: pedidoSugestoes.signal });
+            if (!resposta.ok) throw new Error("Falha nas sugestões");
+            const dados = await resposta.json();
+            if (versao !== versaoSugestoes) return;
+            sugestoes = dados.results || [];
+            sugestoes.forEach((local, i) => {
+                const item = document.createElement("div");
+                item.className = "cidade-item";
+                item.id = `sugestao-cidade-${i}`;
+                item.setAttribute("role", "option");
+                item.setAttribute("aria-selected", "false");
+                const nomeItem = document.createElement("span");
+                nomeItem.className = "cidade-item-nome";
+                nomeItem.textContent = local.name;
+                const regiao = document.createElement("span");
+                regiao.className = "cidade-item-estado";
+                regiao.textContent = [local.admin1, local.country].filter(Boolean).join(", ");
+                item.append(nomeItem, regiao);
+                item.addEventListener("click", () => selecionarCidade(local));
+                listaCidades.appendChild(item);
+            });
+            listaCidades.classList.toggle("ativo", sugestoes.length > 0);
+            campoCidade.setAttribute("aria-expanded", String(sugestoes.length > 0));
+        } catch (erro) {
+            if (erro.name !== "AbortError") console.error("Erro nas sugestões:", erro);
+        }
+    }, 300);
+});
+
+// Captura Enter antes do manipulador existente no HTML para evitar busca dupla.
+campoCidade.addEventListener("keydown", e => {
+    if (e.isComposing) return;
+    if (e.key === "Tab") { fecharSugestoes(); return; }
+    if (e.key === "Escape") { fecharSugestoes(); return; }
+    if (e.key === "Enter" && indiceSugestao >= 0) {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        selecionarCidade(sugestoes[indiceSugestao]);
+        return;
+    }
+    if (!["ArrowDown", "ArrowUp"].includes(e.key) || !sugestoes.length) return;
+    e.preventDefault();
+    indiceSugestao = (indiceSugestao + (e.key === "ArrowDown" ? 1 : -1) + sugestoes.length) % sugestoes.length;
+    Array.from(listaCidades.children).forEach((item, i) => {
+        item.classList.toggle("destaque", i === indiceSugestao);
+        item.setAttribute("aria-selected", String(i === indiceSugestao));
+    });
+    const ativo = listaCidades.children[indiceSugestao];
+    campoCidade.setAttribute("aria-activedescendant", ativo.id);
+    ativo.scrollIntoView({ block: "nearest" });
+}, true);
+
+document.addEventListener("click", e => {
+    if (!campoCidade.parentElement.contains(e.target) && !$("btnBuscar").contains(e.target)) fecharSugestoes();
+});
 
 function usarGPS() {
     iniciarGPS(true);
@@ -947,4 +1047,5 @@ function iniciarSistema() {
 }
 iniciarSistema();
 });
+
 

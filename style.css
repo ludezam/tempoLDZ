@@ -768,3 +768,26 @@ footer{
       max-height:250px;
    }
 }
+
+
+
+/* Modo leve: reduz o custo dos efeitos sem alterar o iframe do radar. */
+.modo-leve .resumo-clima,
+.modo-leve .previsao-card,
+.modo-leve .item,
+.modo-leve input,
+.modo-leve button,
+.modo-leve .lista-cidades {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    box-shadow: none;
+    background: rgba(120, 140, 165, .22);
+}
+
+.modo-leve .cloud { filter: none; }
+.modo-leve .fog-layer { backdrop-filter: none; }
+.modo-leve .star,
+.modo-leve .calor-extremo { animation: none; }
+.modo-leve .sun,
+.modo-leve .moon { box-shadow: none; }
+.modo-leve #sky { transition: none; }

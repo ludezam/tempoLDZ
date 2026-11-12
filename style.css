@@ -771,21 +771,57 @@ footer{
 
 
 
-/* Modo leve: reduz o custo dos efeitos sem alterar o iframe do radar. */
+/* A lista fica acima da previsão e dos botões, com leitura independente do céu. */
+.controles {
+    position: relative;
+    z-index: 30;
+}
+.search-container { z-index: 1; }
+.lista-cidades {
+    background: #17263b;
+    color: #f4f7fc;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    box-shadow: 0 8px 24px rgba(0,0,0,.28);
+    pointer-events: none;
+}
+.lista-cidades.ativo { pointer-events: auto; }
+.cidade-item {
+    min-height: 52px;
+    gap: 12px;
+    align-items: flex-start;
+    flex-direction: column;
+}
+.cidade-item-nome { font-weight: 600; }
+.cidade-item-estado { color: #c5d3e5; opacity: 1; }
+.cidade-item:hover,
+.cidade-item.destaque { background: #294361; }
+
+/* Modo leve: painéis opacos mantêm o texto legível com qualquer clima. */
+.modo-leve body { color: #f4f7fc !important; }
 .modo-leve .resumo-clima,
 .modo-leve .previsao-card,
 .modo-leve .item,
 .modo-leve input,
 .modo-leve button,
-.modo-leve .lista-cidades {
+.modo-leve .lista-cidades,
+.modo-leve .btn-ipmet {
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
     box-shadow: none;
-    background: rgba(120, 140, 165, .22);
+    background: #17263b;
+    color: #f4f7fc;
+    border-color: #41536b;
 }
-
-.modo-leve .cloud { filter: none; }
-.modo-leve .fog-layer { backdrop-filter: none; }
+.modo-leve .item,
+.modo-leve input,
+.modo-leve button { background: #22354d; }
+.modo-leve input::placeholder { color: #c5d3e5; }
+.modo-leve button:hover { background: #304a69; }
+.modo-leve .seta-vento { color: #9ccaff; }
+.modo-leve .cloud-layer,
+.modo-leve .fog-layer { display: none; }
+.modo-leve .rain-layer { opacity: .18; }
 .modo-leve .star,
 .modo-leve .calor-extremo { animation: none; }
 .modo-leve .sun,

@@ -439,3 +439,15 @@ Para relatar um erro, informe navegador, sistema, cidade/estado/país, se foi GP
 
 Este README não concede uma licença de software. Não há arquivo `LICENSE` definido no repositório nesta revisão; uma licença explícita pode ser adicionada pelo responsável pelo projeto. Os dados e conteúdos externos continuam sujeitos às licenças e aos termos de seus respectivos provedores.
 
+
+
+## Aplicativo Android TV
+
+O Tempo LDZ também possui um aplicativo para Android TV, projetores e dispositivos com Android 8.0 ou superior (API 26+). Ele abre o site em tela cheia, com navegação pelo controle remoto e layout adaptado para televisão.
+
+- **Pacote:** `br.com.ldz.tempotv`
+- **APK:** `Tempo-LDZ.apk`
+- **Versão preparada:** 1.5.0
+- **Atualizações:** serão publicadas na página de [Releases](https://github.com/ludezam/tempoLDZ/releases) deste repositório.
+
+A primeira versão do APK foi assinada com um novo certificado. Para atualização pelo TV-LDZ, o aplicativo TV-LDZ precisa reconhecer esse certificado. Instalações manuais sobre uma versão assinada com outra chave podem exigir a remoção da versão antiga, apagando os dados locais.

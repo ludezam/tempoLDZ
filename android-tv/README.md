@@ -4,11 +4,11 @@ O app Android TV está neste subdiretório para manter seus fontes separados da 
 
 ## Versão publicada
 
-A release atual é [Tempo LDZ 1.6.0](https://github.com/ludezam/tempoLDZ/releases/tag/v1.6.0). O asset instalável mantém o nome `Tempo-LDZ.apk`, usado pelo TV-LDZ.
+A release atual é [Tempo LDZ 1.6.1](https://github.com/ludezam/tempoLDZ/releases/tag/v1.6.1). O asset instalável mantém o nome `Tempo-LDZ.apk`, usado pelo TV-LDZ.
 
 - Pacote: `br.com.ldz.tempotv`
 - Requisito: Android 8.0 ou superior (API 26+)
-- Fonte do app e script de integração: [`Tempo-LDZ-Android-TV-source.zip`](Tempo-LDZ-Android-TV-source.zip)
+- Fonte do app e script de integração: [`Tempo-LDZ-Android-TV-source-1.6.1.zip`](Tempo-LDZ-Android-TV-source-1.6.1.zip)
 
 ## Compilar
 

@@ -451,3 +451,8 @@ O Tempo LDZ também possui um aplicativo para Android TV, projetores e dispositi
 - **Atualizações:** serão publicadas na página de [Releases](https://github.com/ludezam/tempoLDZ/releases) deste repositório.
 
 A primeira versão do APK foi assinada com um novo certificado. Para atualização pelo TV-LDZ, o aplicativo TV-LDZ precisa reconhecer esse certificado. Instalações manuais sobre uma versão assinada com outra chave podem exigir a remoção da versão antiga, apagando os dados locais.
+
+
+### Atualização Android TV 1.6.1
+
+A versão 1.6.1 está publicada em [Releases](https://github.com/ludezam/tempoLDZ/releases/tag/v1.6.1), com o ativo `Tempo-LDZ.apk`. Ela mantém o certificado da 1.6.0 e permite atualizar a instalação existente. O código-fonte do app está em [`android-tv/`](https://github.com/ludezam/tempoLDZ/tree/main/android-tv). Os arquivos do site na raiz continuam independentes do aplicativo.

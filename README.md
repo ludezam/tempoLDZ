@@ -456,3 +456,9 @@ A primeira versão do APK foi assinada com um novo certificado. Para atualizaç�
 ### Atualização Android TV 1.6.1
 
 A versão 1.6.1 está publicada em [Releases](https://github.com/ludezam/tempoLDZ/releases/tag/v1.6.1), com o ativo `Tempo-LDZ.apk`. Ela mantém o certificado da 1.6.0 e permite atualizar a instalação existente. O código-fonte do app está em [`android-tv/`](https://github.com/ludezam/tempoLDZ/tree/main/android-tv). Os arquivos do site na raiz continuam independentes do aplicativo.
+
+
+### Atualização Android TV 1.6.2
+
+A versão 1.6.2 mantém o nome `Tempo-LDZ.apk`, a assinatura da 1.6.1 e o processo de atualização pelo TV-LDZ. Traz foco remoto mais discreto, reaproveita o mesmo mapa RainViewer em tela cheia e oferece recarga manual se a camada de chuva não aparecer. Código-fonte: [`android-tv/`](https://github.com/ludezam/tempoLDZ/tree/main/android-tv). O site servido pelo Pages continua com seus arquivos na raiz.
+

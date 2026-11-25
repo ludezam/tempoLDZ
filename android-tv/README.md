@@ -14,6 +14,7 @@ O pacote-fonte público está em [`android-tv/`](https://github.com/ludezam/temp
 - O mapa em tela cheia reutiliza o iframe RainViewer já carregado, evitando manter duas instâncias.
 - Zoom regional inicial 7, comandos para aproximar/afastar, acessar os controles internos do radar e recarregar manualmente a layer se ela não aparecer.
 - A animação não é forçada automaticamente; o usuário pode iniciar o Play pelos controles RainViewer.
+- Voltar fecha mapa/configurações ou retorna da previsão à tela principal. Na tela principal, não aparece confirmação de saída.
 
 ## Compilar no Windows
 

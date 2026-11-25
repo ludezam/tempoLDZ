@@ -439,26 +439,13 @@ Para relatar um erro, informe navegador, sistema, cidade/estado/país, se foi GP
 
 Este README não concede uma licença de software. Não há arquivo `LICENSE` definido no repositório nesta revisão; uma licença explícita pode ser adicionada pelo responsável pelo projeto. Os dados e conteúdos externos continuam sujeitos às licenças e aos termos de seus respectivos provedores.
 
-
-
 ## Aplicativo Android TV
 
-O Tempo LDZ também possui um aplicativo para Android TV, projetores e dispositivos com Android 8.0 ou superior (API 26+). Ele abre o site em tela cheia, com navegação pelo controle remoto e layout adaptado para televisão.
+O Tempo LDZ tem um aplicativo em tela cheia para Android TV e projetores com Android 8.0+ (API 26).
 
+- **Versão:** 1.6.3 ([release](https://github.com/ludezam/tempoLDZ/releases/tag/v1.6.3))
+- **APK:** `Tempo-LDZ.apk`, nome consumido pelo TV-LDZ
 - **Pacote:** `br.com.ldz.tempotv`
-- **APK:** `Tempo-LDZ.apk`
-- **Versão preparada:** 1.5.0
-- **Atualizações:** serão publicadas na página de [Releases](https://github.com/ludezam/tempoLDZ/releases) deste repositório.
+- **Fonte:** [android-tv/](https://github.com/ludezam/tempoLDZ/tree/main/android-tv)
 
-A primeira versão do APK foi assinada com um novo certificado. Para atualização pelo TV-LDZ, o aplicativo TV-LDZ precisa reconhecer esse certificado. Instalações manuais sobre uma versão assinada com outra chave podem exigir a remoção da versão antiga, apagando os dados locais.
-
-
-### Atualização Android TV 1.6.1
-
-A versão 1.6.1 está publicada em [Releases](https://github.com/ludezam/tempoLDZ/releases/tag/v1.6.1), com o ativo `Tempo-LDZ.apk`. Ela mantém o certificado da 1.6.0 e permite atualizar a instalação existente. O código-fonte do app está em [`android-tv/`](https://github.com/ludezam/tempoLDZ/tree/main/android-tv). Os arquivos do site na raiz continuam independentes do aplicativo.
-
-
-### Atualização Android TV 1.6.2
-
-A versão 1.6.2 mantém o nome `Tempo-LDZ.apk`, a assinatura da 1.6.1 e o processo de atualização pelo TV-LDZ. Traz foco remoto mais discreto, reaproveita o mesmo mapa RainViewer em tela cheia e oferece recarga manual se a camada de chuva não aparecer. Voltar fecha mapa/configurações ou retorna da previsão à tela principal; na tela principal, não abre confirmação de saída. Código-fonte: [`android-tv/`](https://github.com/ludezam/tempoLDZ/tree/main/android-tv). O site servido pelo Pages continua com seus arquivos na raiz.
-
+A versão 1.6.3 envia Voltar da tela principal à home do Android TV, sem confirmação; nas outras telas, fecha o painel atual ou retorna ao clima e radar. O foco do controle remoto usa fundo branco e texto azul-marinho. As alterações ficam no subdiretório Android e não mudam os arquivos do site na raiz.

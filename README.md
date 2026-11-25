@@ -443,9 +443,9 @@ Este README não concede uma licença de software. Não há arquivo `LICENSE` de
 
 O Tempo LDZ tem um aplicativo em tela cheia para Android TV e projetores com Android 8.0+ (API 26).
 
-- **Versão:** 1.6.3 ([release](https://github.com/ludezam/tempoLDZ/releases/tag/v1.6.3))
-- **APK:** `Tempo-LDZ.apk`, nome consumido pelo TV-LDZ
+- **Versão:** 1.6.4 ([release](https://github.com/ludezam/tempoLDZ/releases/tag/v1.6.4))
+- **APK:** `Tempo-LDZ.apk`, nome usado pelo TV-LDZ
 - **Pacote:** `br.com.ldz.tempotv`
 - **Fonte:** [android-tv/](https://github.com/ludezam/tempoLDZ/tree/main/android-tv)
 
-A versão 1.6.3 envia Voltar da tela principal à home do Android TV, sem confirmação; nas outras telas, fecha o painel atual ou retorna ao clima e radar. O foco do controle remoto usa fundo branco e texto azul-marinho. As alterações ficam no subdiretório Android e não mudam os arquivos do site na raiz.
+O radar agora carrega na tela inicial; as setas percorrem configurações, mapa fullscreen e atualizar de cima para baixo. No mapa fullscreen, os botões de zoom, recarga e fechamento permanecem acessíveis e o iframe não captura o foco. A versão anterior também permite sair à home do Android TV pressionando Voltar na tela principal. Os arquivos do site na raiz continuam independentes do aplicativo.

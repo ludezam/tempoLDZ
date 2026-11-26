@@ -441,11 +441,11 @@ Este README não concede uma licença de software. Não há arquivo `LICENSE` de
 
 ## Aplicativo Android TV
 
-O Tempo LDZ tem um aplicativo em tela cheia para Android TV e projetores com Android 8.0+ (API 26).
+O Tempo LDZ oferece um aplicativo em tela cheia para Android TV e projetores com Android 8.0+ (API 26).
 
-- **Versão:** 1.6.4 ([release](https://github.com/ludezam/tempoLDZ/releases/tag/v1.6.4))
-- **APK:** `Tempo-LDZ.apk`, nome usado pelo TV-LDZ
+- **Versão:** [1.6.5](https://github.com/ludezam/tempoLDZ/releases/tag/v1.6.5)
+- **APK:** [`Tempo-LDZ.apk`](https://github.com/ludezam/tempoLDZ/releases/download/v1.6.5/Tempo-LDZ.apk), nome utilizado pelo TV-LDZ para instalar e atualizar.
 - **Pacote:** `br.com.ldz.tempotv`
-- **Fonte:** [android-tv/](https://github.com/ludezam/tempoLDZ/tree/main/android-tv)
+- **Código-fonte Android:** [`Tempo-LDZ-Android-TV-v1.6.5-source.zip`](https://github.com/ludezam/tempoLDZ/releases/download/v1.6.5/Tempo-LDZ-Android-TV-v1.6.5-source.zip)
 
-O radar agora carrega na tela inicial; as setas percorrem configurações, mapa fullscreen e atualizar de cima para baixo. No mapa fullscreen, os botões de zoom, recarga e fechamento permanecem acessíveis e o iframe não captura o foco. A versão anterior também permite sair à home do Android TV pressionando Voltar na tela principal. Os arquivos do site na raiz continuam independentes do aplicativo.
+Na tela inicial, o radar carrega automaticamente. As setas do controle percorrem configurações, mapa em tela cheia e atualização na ordem vertical da interface. O mapa em tela cheia mantém os controles acessíveis sem recarregar o radar. O botão Voltar fecha configurações e mapa; na tela principal, retorna à home da Android TV.

@@ -178,15 +178,15 @@ async function atualizarClima() {
         if (!dados.current || !dados.hourly?.time?.length || !dados.daily?.sunrise?.length) {
             throw new Error("Resposta meteorológica incompleta");
         }
-        const horaAtual = dados.current.time.slice(0, 13);
-        const indiceAtual = dados.hourly.time.findIndex(hora => hora.slice(0, 13) === horaAtual);
+        // A probabilidade horária do Open-Meteo cobre a hora anterior ao horário indicado.
+        const indiceAtual = dados.hourly.time.findIndex(hora => hora > dados.current.time);
         climaAtual.temperatura = dados.current.temperature_2m;
         climaAtual.sensacao = dados.current.apparent_temperature;
         climaAtual.umidade = dados.current.relative_humidity_2m;
         climaAtual.vento = dados.current.wind_speed_10m;
         climaAtual.direcaoVento = dados.current.wind_direction_10m || 0;
         climaAtual.chuva = dados.current.precipitation;
-        climaAtual.probabilidade = dados.hourly.precipitation_probability[indiceAtual] ?? 0;
+        climaAtual.probabilidade = dados.hourly.precipitation_probability?.[indiceAtual] ?? null;
         climaAtual.cloudCover = dados.current.cloud_cover;
         climaAtual.weatherCode = dados.current.weather_code;
         climaAtual.sunrise = dados.daily.sunrise[0];

@@ -237,7 +237,6 @@ function atualizarInterface() {
 
     $("sunrise").textContent = climaAtual.sunrise.slice(11,16);
     $("sunset").textContent = climaAtual.sunset.slice(11,16);
-    $("horaLocal").textContent = climaAtual.horarioLocal.slice(11,16);
 
     // Atualizar seta de vento
     atualizarSetaVento();

@@ -8,8 +8,8 @@
     <meta name="apple-mobile-web-app-title" content="🌦️ Tempo LDZ">
     <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="180x180" href="apple-touch-icon.png">
-    <link rel="stylesheet" href="style.css?v=20261126-contraste-1">
-    <script defer src="script.js?v=20261126-icons-1"></script>
+    <link rel="stylesheet" href="style.css?v=20261126-astro-1">
+    <script defer src="script.js?v=20261126-astro-1"></script>
 </head>
 
 <body>
@@ -51,7 +51,6 @@
         <symbol id="ldz-radar" viewBox="0 0 64 64"><path d="M13 21a21 21 0 0 0 30 30m-30-30 30 30M32 39l12-15m-7-11a18 18 0 0 1 13 13m-9-22a29 29 0 0 1 18 18M30 55l-4 5h18" fill="none" stroke="currentColor" stroke-width="4.2" stroke-linejoin="round" stroke-linecap="round"/></symbol>
         <symbol id="ldz-nascer" viewBox="0 0 64 64"><path d="M9 45h46m-39-6a16 16 0 0 1 32 0M9 53h46M32 8v10m-6-4 6-6 6 6" fill="none" stroke="currentColor" stroke-width="4.2" stroke-linejoin="round" stroke-linecap="round"/></symbol>
         <symbol id="ldz-por" viewBox="0 0 64 64"><path d="M9 45h46m-39-6a16 16 0 0 1 32 0M9 53h46M32 8v10m-6-6 6 6 6-6" fill="none" stroke="currentColor" stroke-width="4.2" stroke-linejoin="round" stroke-linecap="round"/></symbol>
-        <symbol id="ldz-relogio" viewBox="0 0 64 64"><path d="M32 17v15l9 6M54 32a22 22 0 1 1-44 0 22 22 0 0 1 44 0Z" fill="none" stroke="currentColor" stroke-width="4.2" stroke-linejoin="round" stroke-linecap="round"/></symbol>
         <symbol id="ldz-aviso" viewBox="0 0 64 64"><path d="M32 25v11m0 8v1M28 12 8 47a5 5 0 0 0 4 8h40a5 5 0 0 0 4-8L36 12a5 5 0 0 0-8 0Z" fill="none" stroke="currentColor" stroke-width="4.2" stroke-linejoin="round" stroke-linecap="round"/></symbol>
         <symbol id="ldz-estavel" viewBox="0 0 64 64"><path d="m21 33 7 7 15-16M55 32a23 23 0 1 1-46 0 23 23 0 0 1 46 0Z" fill="none" stroke="currentColor" stroke-width="4.2" stroke-linejoin="round" stroke-linecap="round"/></symbol>
         <symbol id="ldz-chuva-contorno" viewBox="0 0 64 64"><path d="M17 38a9 9 0 0 1-1-18 14 14 0 0 1 27-1 10 10 0 1 1 1 19Z" fill="none" stroke="currentColor" stroke-width="3.3" stroke-linejoin="round" stroke-linecap="round"/><path d="m22 47-4 8m17-8-4 8m17-8-4 8" fill="none" stroke="var(--ldz-ciano, #a7ebff)" stroke-width="3.1" stroke-linejoin="round" stroke-linecap="round"/></symbol>
@@ -171,15 +170,12 @@
     <section class="previsao astro">
         <br>
 		<h2>Mais informações</h2>
-        <div class="dados-resumo">
+        <div class="dados-resumo dados-astro">
             <div class="item">
                 <svg class="ldz-icon" aria-hidden="true" focusable="false"><use href="#ldz-nascer"/></svg> <span>Nascer do Sol</span> <strong id="sunrise">--:--</strong>
             </div>
             <div class="item">
                 <svg class="ldz-icon" aria-hidden="true" focusable="false"><use href="#ldz-por"/></svg> <span>Pôr do Sol</span> <strong id="sunset">--:--</strong>
-            </div>
-            <div class="item">
-                <svg class="ldz-icon" aria-hidden="true" focusable="false"><use href="#ldz-relogio"/></svg> <span>Hora da atualização</span> <strong id="horaLocal">--:--</strong>
             </div>
         </div>
         

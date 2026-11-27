@@ -646,7 +646,7 @@ button:hover{
 }
 
 .previsao-card .icone{
-   font-size:1.6rem;
+   line-height:1;
    margin-bottom:6px;
 }
 
@@ -762,3 +762,42 @@ input:focus-visible, button:focus-visible, .btn-ipmet:focus-visible {
 .controles .btn-modo:hover { background: rgba(140, 160, 185, .15); }
 .localizacao-privada summary:focus-visible { outline: 2px solid #9ccaff; outline-offset: 3px; }
 .modo-leve .lightning { display: none; }
+
+/* Ícones vetoriais: não dependem da fonte de emojis do dispositivo. */
+.ldz-sprite {
+   position:absolute;
+   width:0;
+   height:0;
+   overflow:hidden;
+   pointer-events:none;
+}
+.ldz-icon {
+   display:inline-block;
+   width:1.2em;
+   height:1.2em;
+   vertical-align:-.22em;
+   flex:none;
+}
+.topo .ldz-brand-icon {
+   width:1.28em;
+   height:1.28em;
+   vertical-align:-.3em;
+}
+.item > .ldz-icon { width:21px; height:21px; }
+.btn-ipmet { gap:.42em; }
+.previsao-card .ldz-weather-icon {
+   width:43px;
+   height:43px;
+   vertical-align:middle;
+   filter:drop-shadow(0 1px 1px rgba(15,35,65,.62));
+}
+.ldz-alerta-forte { color:#ffaaaa; }
+.ldz-alerta { color:#ffda80; }
+.ldz-estavel { color:#9ae3bc; }
+:root:not(.modo-leve) .ldz-icons-dia :is(.resumo-clima, .previsao) {
+   --ldz-ciano:#12598a;
+   --ldz-dourado:#8a4800;
+}
+:root:not(.modo-leve) .ldz-icons-dia .ldz-alerta-forte { color:#9b1930; }
+:root:not(.modo-leve) .ldz-icons-dia .ldz-alerta { color:#764600; }
+:root:not(.modo-leve) .ldz-icons-dia .ldz-estavel { color:#086544; }

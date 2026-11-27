@@ -4,12 +4,55 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title> 🌤️ Tempo LDZ </title>
-    <link rel="stylesheet" href="style.css?v=20261111-4">
-    <script defer src="script.js?v=20261111-4"></script>
+    <title>Tempo LDZ</title>
+    <link rel="stylesheet" href="style.css?v=20261126-icons-1">
+    <script defer src="script.js?v=20261126-icons-1"></script>
 </head>
 
 <body>
+    <!-- Ícones originais do Tempo LDZ: previsão atmosférica e controles em traço. -->
+    <svg class="ldz-sprite" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+        <defs><linearGradient id="ldz-gold" x1="0" y1="0" x2="0%" y2="100%" gradientUnits="objectBoundingBox"><stop stop-color="#FFF5AA"/><stop offset="1" stop-color="#FFC451"/></linearGradient><linearGradient id="ldz-silver" x1="0" y1="0" x2="0%" y2="100%" gradientUnits="objectBoundingBox"><stop stop-color="#F8FCFF"/><stop offset="1" stop-color="#B2D1EB"/></linearGradient><linearGradient id="ldz-cloud" x1="0" y1="0" x2="0%" y2="100%" gradientUnits="objectBoundingBox"><stop stop-color="#FCFEFF"/><stop offset="1" stop-color="#A7CEE5"/></linearGradient><linearGradient id="ldz-storm" x1="0" y1="0" x2="0%" y2="100%" gradientUnits="objectBoundingBox"><stop stop-color="#E4EEFF"/><stop offset="1" stop-color="#92A7DB"/></linearGradient></defs>
+        <symbol id="ldz-sol" viewBox="0 0 64 64"><path d="M32 5v6m0 42v6M5 32h6m42 0h6M13 13l4.5 4.5m29 29L51 51M13 51l4.5-4.5m29-29L51 13" fill="none" stroke="#FFDD78" stroke-width="3.2" stroke-linejoin="round" stroke-linecap="round"/><circle cx="32" cy="32" r="15" fill="url(#ldz-gold)" stroke="none" stroke-width="0"/><path d="M22 31a10 10 0 0 1 9-9" fill="none" stroke="#FFF6C8" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/></symbol>
+        <symbol id="ldz-parcial" viewBox="0 0 64 64"><path d="M23 6v4M9 13l3 3M5 25h4m28-12-3 3M40 25h4" fill="none" stroke="#FFDE7F" stroke-width="2.8" stroke-linejoin="round" stroke-linecap="round"/><circle cx="23" cy="23" r="11" fill="url(#ldz-gold)" stroke="none" stroke-width="0"/><path d="M22 49a9 9 0 0 1 0-18 13 13 0 0 1 25-1 10 10 0 1 1 1 19Z" fill="url(#ldz-cloud)" stroke="none" stroke-width="0" stroke-linejoin="round" stroke-linecap="round"/></symbol>
+        <symbol id="ldz-nuvem" viewBox="0 0 64 64"><path d="M17 44a10 10 0 0 1-1-20 15 15 0 0 1 29-2 11 11 0 0 1 0 22Z" fill="url(#ldz-cloud)" stroke="none" stroke-width="0" stroke-linejoin="round" stroke-linecap="round"/><path d="M17 45h38" fill="none" stroke="#87B3D6" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/></symbol>
+        <symbol id="ldz-chuva" viewBox="0 0 64 64"><path d="M17 38a9 9 0 0 1-1-18 14 14 0 0 1 27-1 10 10 0 1 1 1 19Z" fill="url(#ldz-cloud)" stroke="none" stroke-width="0" stroke-linejoin="round" stroke-linecap="round"/><path d="m22 46-4 9m17-9-4 9m17-9-4 9" fill="none" stroke="#84DEFF" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/></symbol>
+        <symbol id="ldz-trovao" viewBox="0 0 64 64"><path d="M17 38a9 9 0 0 1-1-18 14 14 0 0 1 27-1 10 10 0 1 1 1 19Z" fill="url(#ldz-storm)" stroke="none" stroke-width="0" stroke-linejoin="round" stroke-linecap="round"/><path d="m36 35-13 14h10l-4 12 16-17H34Z" fill="url(#ldz-gold)" stroke="#2C4567" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/></symbol>
+        <symbol id="ldz-neblina" viewBox="0 0 64 64"><g transform="translate(0 1) scale(0.94)"><path d="M17 38a9 9 0 0 1-1-18 14 14 0 0 1 27-1 10 10 0 1 1 1 19Z" fill="url(#ldz-cloud)" stroke="none" stroke-width="0" stroke-linejoin="round" stroke-linecap="round"/></g><path d="M13 42h37m-32 7h24m-12 7h27" fill="none" stroke="#99DFF6" stroke-width="3.4" stroke-linejoin="round" stroke-linecap="round"/></symbol>
+        <symbol id="ldz-garoa" viewBox="0 0 64 64"><g transform="translate(0 -3) scale(0.94)"><path d="M23 6v4M9 13l3 3M5 25h4m28-12-3 3M40 25h4" fill="none" stroke="#FFDE7F" stroke-width="2.8" stroke-linejoin="round" stroke-linecap="round"/><circle cx="23" cy="23" r="11" fill="url(#ldz-gold)" stroke="none" stroke-width="0"/><path d="M22 49a9 9 0 0 1 0-18 13 13 0 0 1 25-1 10 10 0 1 1 1 19Z" fill="url(#ldz-cloud)" stroke="none" stroke-width="0" stroke-linejoin="round" stroke-linecap="round"/></g><path d="m24 47-3 7m14-7-3 7" fill="none" stroke="#84DEFF" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"/></symbol>
+        <symbol id="ldz-neve" viewBox="0 0 64 64"><path d="M32 8v48M11 20l42 24M11 44l42-24M24 11l8 7 8-7m-16 42 8-7 8 7M10 29l10-4-1-10m26 34-1-10 10-4M10 35l10 4-1 10m26-34-1 10 10 4" fill="none" stroke="#D9F2FF" stroke-width="3.6" stroke-linejoin="round" stroke-linecap="round"/></symbol>
+        <symbol id="ldz-lua" viewBox="0 0 64 64"><path d="M39 8c-7 7-8 17-3 25 4 6 11 9 18 8A23 23 0 1 1 39 8Z" fill="url(#ldz-silver)" stroke="none" stroke-width="0" stroke-linejoin="round" stroke-linecap="round"/><path d="M49 9q1 7 8 8-7 1-8 8-1-7-8-8 7-1 8-8Z" fill="#C0E8FF" stroke="none" stroke-width="0" stroke-linejoin="round" stroke-linecap="round"/><circle cx="51" cy="30" r="1.7" fill="#DAEDFF" stroke="none" stroke-width="0"/></symbol>
+        <symbol id="ldz-lua-nova" viewBox="0 0 64 64"><circle cx="30" cy="33" r="21" fill="#263956" stroke="#9CB8D7" stroke-width="2"/><g transform="translate(13 0) scale(0.75)"><path d="M49 9q1 7 8 8-7 1-8 8-1-7-8-8 7-1 8-8Z" fill="#C0E8FF" stroke="none" stroke-width="0" stroke-linejoin="round" stroke-linecap="round"/></g></symbol>
+        <symbol id="ldz-noite-nova" viewBox="0 0 64 64"><g transform="translate(0 0) scale(0.78)"><circle cx="30" cy="33" r="21" fill="#263956" stroke="#9CB8D7" stroke-width="2"/><g transform="translate(13 0) scale(0.75)"><path d="M49 9q1 7 8 8-7 1-8 8-1-7-8-8 7-1 8-8Z" fill="#C0E8FF" stroke="none" stroke-width="0" stroke-linejoin="round" stroke-linecap="round"/></g></g><g transform="translate(12 15) scale(0.94)"><path d="M16 47a9 9 0 0 1 0-18 13 13 0 0 1 25-2 10 10 0 1 1 3 20Z" fill="url(#ldz-cloud)" stroke="#6086AB" stroke-width="1.4" stroke-linejoin="round" stroke-linecap="round"/></g></symbol>
+        <symbol id="ldz-lua-crescente-fina" viewBox="0 0 64 64"><circle cx="30" cy="33" r="21" fill="#263956" stroke="#9CB8D7" stroke-width="2"/><path d="M30 12A21 21 0 0 1 30 54A14 21 0 0 0 30 12Z" fill="url(#ldz-silver)" stroke="none" stroke-width="0" stroke-linejoin="round" stroke-linecap="round"/><g transform="translate(13 0) scale(0.75)"><path d="M49 9q1 7 8 8-7 1-8 8-1-7-8-8 7-1 8-8Z" fill="#C0E8FF" stroke="none" stroke-width="0" stroke-linejoin="round" stroke-linecap="round"/></g></symbol>
+        <symbol id="ldz-noite-crescente-fina" viewBox="0 0 64 64"><g transform="translate(0 0) scale(0.78)"><circle cx="30" cy="33" r="21" fill="#263956" stroke="#9CB8D7" stroke-width="2"/><path d="M30 12A21 21 0 0 1 30 54A14 21 0 0 0 30 12Z" fill="url(#ldz-silver)" stroke="none" stroke-width="0" stroke-linejoin="round" stroke-linecap="round"/><g transform="translate(13 0) scale(0.75)"><path d="M49 9q1 7 8 8-7 1-8 8-1-7-8-8 7-1 8-8Z" fill="#C0E8FF" stroke="none" stroke-width="0" stroke-linejoin="round" stroke-linecap="round"/></g></g><g transform="translate(12 15) scale(0.94)"><path d="M16 47a9 9 0 0 1 0-18 13 13 0 0 1 25-2 10 10 0 1 1 3 20Z" fill="url(#ldz-cloud)" stroke="#6086AB" stroke-width="1.4" stroke-linejoin="round" stroke-linecap="round"/></g></symbol>
+        <symbol id="ldz-lua-quarto-crescente" viewBox="0 0 64 64"><circle cx="30" cy="33" r="21" fill="#263956" stroke="#9CB8D7" stroke-width="2"/><path d="M30 12A21 21 0 0 1 30 54L30 12Z" fill="url(#ldz-silver)" stroke="none" stroke-width="0" stroke-linejoin="round" stroke-linecap="round"/><g transform="translate(13 0) scale(0.75)"><path d="M49 9q1 7 8 8-7 1-8 8-1-7-8-8 7-1 8-8Z" fill="#C0E8FF" stroke="none" stroke-width="0" stroke-linejoin="round" stroke-linecap="round"/></g></symbol>
+        <symbol id="ldz-noite-quarto-crescente" viewBox="0 0 64 64"><g transform="translate(0 0) scale(0.78)"><circle cx="30" cy="33" r="21" fill="#263956" stroke="#9CB8D7" stroke-width="2"/><path d="M30 12A21 21 0 0 1 30 54L30 12Z" fill="url(#ldz-silver)" stroke="none" stroke-width="0" stroke-linejoin="round" stroke-linecap="round"/><g transform="translate(13 0) scale(0.75)"><path d="M49 9q1 7 8 8-7 1-8 8-1-7-8-8 7-1 8-8Z" fill="#C0E8FF" stroke="none" stroke-width="0" stroke-linejoin="round" stroke-linecap="round"/></g></g><g transform="translate(12 15) scale(0.94)"><path d="M16 47a9 9 0 0 1 0-18 13 13 0 0 1 25-2 10 10 0 1 1 3 20Z" fill="url(#ldz-cloud)" stroke="#6086AB" stroke-width="1.4" stroke-linejoin="round" stroke-linecap="round"/></g></symbol>
+        <symbol id="ldz-lua-gibosa-crescente" viewBox="0 0 64 64"><circle cx="30" cy="33" r="21" fill="#263956" stroke="#9CB8D7" stroke-width="2"/><path d="M30 12A21 21 0 0 1 30 54A10 21 0 0 1 30 12Z" fill="url(#ldz-silver)" stroke="none" stroke-width="0" stroke-linejoin="round" stroke-linecap="round"/><g transform="translate(13 0) scale(0.75)"><path d="M49 9q1 7 8 8-7 1-8 8-1-7-8-8 7-1 8-8Z" fill="#C0E8FF" stroke="none" stroke-width="0" stroke-linejoin="round" stroke-linecap="round"/></g></symbol>
+        <symbol id="ldz-noite-gibosa-crescente" viewBox="0 0 64 64"><g transform="translate(0 0) scale(0.78)"><circle cx="30" cy="33" r="21" fill="#263956" stroke="#9CB8D7" stroke-width="2"/><path d="M30 12A21 21 0 0 1 30 54A10 21 0 0 1 30 12Z" fill="url(#ldz-silver)" stroke="none" stroke-width="0" stroke-linejoin="round" stroke-linecap="round"/><g transform="translate(13 0) scale(0.75)"><path d="M49 9q1 7 8 8-7 1-8 8-1-7-8-8 7-1 8-8Z" fill="#C0E8FF" stroke="none" stroke-width="0" stroke-linejoin="round" stroke-linecap="round"/></g></g><g transform="translate(12 15) scale(0.94)"><path d="M16 47a9 9 0 0 1 0-18 13 13 0 0 1 25-2 10 10 0 1 1 3 20Z" fill="url(#ldz-cloud)" stroke="#6086AB" stroke-width="1.4" stroke-linejoin="round" stroke-linecap="round"/></g></symbol>
+        <symbol id="ldz-lua-cheia" viewBox="0 0 64 64"><circle cx="30" cy="33" r="21" fill="url(#ldz-silver)" stroke="none" stroke-width="0"/><g transform="translate(13 0) scale(0.75)"><path d="M49 9q1 7 8 8-7 1-8 8-1-7-8-8 7-1 8-8Z" fill="#C0E8FF" stroke="none" stroke-width="0" stroke-linejoin="round" stroke-linecap="round"/></g></symbol>
+        <symbol id="ldz-noite-cheia" viewBox="0 0 64 64"><g transform="translate(0 0) scale(0.78)"><circle cx="30" cy="33" r="21" fill="url(#ldz-silver)" stroke="none" stroke-width="0"/><g transform="translate(13 0) scale(0.75)"><path d="M49 9q1 7 8 8-7 1-8 8-1-7-8-8 7-1 8-8Z" fill="#C0E8FF" stroke="none" stroke-width="0" stroke-linejoin="round" stroke-linecap="round"/></g></g><g transform="translate(12 15) scale(0.94)"><path d="M16 47a9 9 0 0 1 0-18 13 13 0 0 1 25-2 10 10 0 1 1 3 20Z" fill="url(#ldz-cloud)" stroke="#6086AB" stroke-width="1.4" stroke-linejoin="round" stroke-linecap="round"/></g></symbol>
+        <symbol id="ldz-lua-gibosa-minguante" viewBox="0 0 64 64"><circle cx="30" cy="33" r="21" fill="#263956" stroke="#9CB8D7" stroke-width="2"/><path d="M30 12A21 21 0 0 0 30 54A10 21 0 0 0 30 12Z" fill="url(#ldz-silver)" stroke="none" stroke-width="0" stroke-linejoin="round" stroke-linecap="round"/><g transform="translate(13 0) scale(0.75)"><path d="M49 9q1 7 8 8-7 1-8 8-1-7-8-8 7-1 8-8Z" fill="#C0E8FF" stroke="none" stroke-width="0" stroke-linejoin="round" stroke-linecap="round"/></g></symbol>
+        <symbol id="ldz-noite-gibosa-minguante" viewBox="0 0 64 64"><g transform="translate(0 0) scale(0.78)"><circle cx="30" cy="33" r="21" fill="#263956" stroke="#9CB8D7" stroke-width="2"/><path d="M30 12A21 21 0 0 0 30 54A10 21 0 0 0 30 12Z" fill="url(#ldz-silver)" stroke="none" stroke-width="0" stroke-linejoin="round" stroke-linecap="round"/><g transform="translate(13 0) scale(0.75)"><path d="M49 9q1 7 8 8-7 1-8 8-1-7-8-8 7-1 8-8Z" fill="#C0E8FF" stroke="none" stroke-width="0" stroke-linejoin="round" stroke-linecap="round"/></g></g><g transform="translate(12 15) scale(0.94)"><path d="M16 47a9 9 0 0 1 0-18 13 13 0 0 1 25-2 10 10 0 1 1 3 20Z" fill="url(#ldz-cloud)" stroke="#6086AB" stroke-width="1.4" stroke-linejoin="round" stroke-linecap="round"/></g></symbol>
+        <symbol id="ldz-lua-quarto-minguante" viewBox="0 0 64 64"><circle cx="30" cy="33" r="21" fill="#263956" stroke="#9CB8D7" stroke-width="2"/><path d="M30 12A21 21 0 0 0 30 54L30 12Z" fill="url(#ldz-silver)" stroke="none" stroke-width="0" stroke-linejoin="round" stroke-linecap="round"/><g transform="translate(13 0) scale(0.75)"><path d="M49 9q1 7 8 8-7 1-8 8-1-7-8-8 7-1 8-8Z" fill="#C0E8FF" stroke="none" stroke-width="0" stroke-linejoin="round" stroke-linecap="round"/></g></symbol>
+        <symbol id="ldz-noite-quarto-minguante" viewBox="0 0 64 64"><g transform="translate(0 0) scale(0.78)"><circle cx="30" cy="33" r="21" fill="#263956" stroke="#9CB8D7" stroke-width="2"/><path d="M30 12A21 21 0 0 0 30 54L30 12Z" fill="url(#ldz-silver)" stroke="none" stroke-width="0" stroke-linejoin="round" stroke-linecap="round"/><g transform="translate(13 0) scale(0.75)"><path d="M49 9q1 7 8 8-7 1-8 8-1-7-8-8 7-1 8-8Z" fill="#C0E8FF" stroke="none" stroke-width="0" stroke-linejoin="round" stroke-linecap="round"/></g></g><g transform="translate(12 15) scale(0.94)"><path d="M16 47a9 9 0 0 1 0-18 13 13 0 0 1 25-2 10 10 0 1 1 3 20Z" fill="url(#ldz-cloud)" stroke="#6086AB" stroke-width="1.4" stroke-linejoin="round" stroke-linecap="round"/></g></symbol>
+        <symbol id="ldz-lua-minguante-fina" viewBox="0 0 64 64"><circle cx="30" cy="33" r="21" fill="#263956" stroke="#9CB8D7" stroke-width="2"/><path d="M30 12A21 21 0 0 0 30 54A14 21 0 0 1 30 12Z" fill="url(#ldz-silver)" stroke="none" stroke-width="0" stroke-linejoin="round" stroke-linecap="round"/><g transform="translate(13 0) scale(0.75)"><path d="M49 9q1 7 8 8-7 1-8 8-1-7-8-8 7-1 8-8Z" fill="#C0E8FF" stroke="none" stroke-width="0" stroke-linejoin="round" stroke-linecap="round"/></g></symbol>
+        <symbol id="ldz-noite-minguante-fina" viewBox="0 0 64 64"><g transform="translate(0 0) scale(0.78)"><circle cx="30" cy="33" r="21" fill="#263956" stroke="#9CB8D7" stroke-width="2"/><path d="M30 12A21 21 0 0 0 30 54A14 21 0 0 1 30 12Z" fill="url(#ldz-silver)" stroke="none" stroke-width="0" stroke-linejoin="round" stroke-linecap="round"/><g transform="translate(13 0) scale(0.75)"><path d="M49 9q1 7 8 8-7 1-8 8-1-7-8-8 7-1 8-8Z" fill="#C0E8FF" stroke="none" stroke-width="0" stroke-linejoin="round" stroke-linecap="round"/></g></g><g transform="translate(12 15) scale(0.94)"><path d="M16 47a9 9 0 0 1 0-18 13 13 0 0 1 25-2 10 10 0 1 1 3 20Z" fill="url(#ldz-cloud)" stroke="#6086AB" stroke-width="1.4" stroke-linejoin="round" stroke-linecap="round"/></g></symbol>
+        <symbol id="ldz-pin" viewBox="0 0 64 64"><path d="M32 58C26 51 13 39 13 26a19 19 0 0 1 38 0c0 13-13 25-19 32Z" fill="none" stroke="currentColor" stroke-width="4.4" stroke-linejoin="round" stroke-linecap="round"/><circle cx="32" cy="26" r="6" fill="none" stroke="var(--ldz-ciano, #a7ebff)" stroke-width="3.7"/></symbol>
+        <symbol id="ldz-temp" viewBox="0 0 64 64"><path d="M26 36V14a6 6 0 0 1 12 0v22a12 12 0 1 1-12 0Z" fill="none" stroke="currentColor" stroke-width="4.2" stroke-linejoin="round" stroke-linecap="round"/><path d="M32 24v20" fill="none" stroke="var(--ldz-dourado, #ffdd79)" stroke-width="4.3" stroke-linejoin="round" stroke-linecap="round"/><circle cx="32" cy="46" r="4.6" fill="var(--ldz-dourado, #ffdd79)" stroke="none" stroke-width="0"/></symbol>
+        <symbol id="ldz-gota" viewBox="0 0 64 64"><path d="M32 8C27 17 16 28 16 39a16 16 0 0 0 32 0C48 28 37 17 32 8Z" fill="none" stroke="currentColor" stroke-width="4.2" stroke-linejoin="round" stroke-linecap="round"/><path d="M24 40q0 6 6 7" fill="none" stroke="var(--ldz-ciano, #a7ebff)" stroke-width="3.8" stroke-linejoin="round" stroke-linecap="round"/></symbol>
+        <symbol id="ldz-atualizar" viewBox="0 0 64 64"><path d="M50 24A20 20 0 1 0 51 38m0-25v12H39" fill="none" stroke="currentColor" stroke-width="4.5" stroke-linejoin="round" stroke-linecap="round"/></symbol>
+        <symbol id="ldz-busca" viewBox="0 0 64 64"><path d="M38 38l15 15M43 29a14 14 0 1 1-28 0 14 14 0 0 1 28 0Z" fill="none" stroke="currentColor" stroke-width="4.2" stroke-linejoin="round" stroke-linecap="round"/></symbol>
+        <symbol id="ldz-modo" viewBox="0 0 64 64"><path d="M9 22h46M46 13l9 9-9 9M55 42H9m9-9-9 9 9 9" fill="none" stroke="currentColor" stroke-width="4.2" stroke-linejoin="round" stroke-linecap="round"/></symbol>
+        <symbol id="ldz-satelite" viewBox="0 0 64 64"><path d="m23 23 18 18m-12-24 18 18m-27-14 15-15 9 9-15 15m4 4 15-15 9 9-15 15M9 35a20 20 0 0 0 20 20M9 44a11 11 0 0 0 11 11" fill="none" stroke="currentColor" stroke-width="4.2" stroke-linejoin="round" stroke-linecap="round"/></symbol>
+        <symbol id="ldz-radar" viewBox="0 0 64 64"><path d="M13 21a21 21 0 0 0 30 30m-30-30 30 30M32 39l12-15m-7-11a18 18 0 0 1 13 13m-9-22a29 29 0 0 1 18 18M30 55l-4 5h18" fill="none" stroke="currentColor" stroke-width="4.2" stroke-linejoin="round" stroke-linecap="round"/></symbol>
+        <symbol id="ldz-nascer" viewBox="0 0 64 64"><path d="M9 45h46m-39-6a16 16 0 0 1 32 0M9 53h46M32 8v10m-6-4 6-6 6 6" fill="none" stroke="currentColor" stroke-width="4.2" stroke-linejoin="round" stroke-linecap="round"/></symbol>
+        <symbol id="ldz-por" viewBox="0 0 64 64"><path d="M9 45h46m-39-6a16 16 0 0 1 32 0M9 53h46M32 8v10m-6-6 6 6 6-6" fill="none" stroke="currentColor" stroke-width="4.2" stroke-linejoin="round" stroke-linecap="round"/></symbol>
+        <symbol id="ldz-relogio" viewBox="0 0 64 64"><path d="M32 17v15l9 6M54 32a22 22 0 1 1-44 0 22 22 0 0 1 44 0Z" fill="none" stroke="currentColor" stroke-width="4.2" stroke-linejoin="round" stroke-linecap="round"/></symbol>
+        <symbol id="ldz-aviso" viewBox="0 0 64 64"><path d="M32 25v11m0 8v1M28 12 8 47a5 5 0 0 0 4 8h40a5 5 0 0 0 4-8L36 12a5 5 0 0 0-8 0Z" fill="none" stroke="currentColor" stroke-width="4.2" stroke-linejoin="round" stroke-linecap="round"/></symbol>
+        <symbol id="ldz-estavel" viewBox="0 0 64 64"><path d="m21 33 7 7 15-16M55 32a23 23 0 1 1-46 0 23 23 0 0 1 46 0Z" fill="none" stroke="currentColor" stroke-width="4.2" stroke-linejoin="round" stroke-linecap="round"/></symbol>
+        <symbol id="ldz-chuva-contorno" viewBox="0 0 64 64"><path d="M17 38a9 9 0 0 1-1-18 14 14 0 0 1 27-1 10 10 0 1 1 1 19Z" fill="none" stroke="currentColor" stroke-width="3.3" stroke-linejoin="round" stroke-linecap="round"/><path d="m22 47-4 8m17-8-4 8m17-8-4 8" fill="none" stroke="var(--ldz-ciano, #a7ebff)" stroke-width="3.1" stroke-linejoin="round" stroke-linecap="round"/></symbol>
+    </svg>
     <!-- FUNDO DINÂMICO -->
     <div id="sky"></div>
     <div class="sun"></div>
@@ -23,13 +66,13 @@
 
     <!-- TOPO -->
     <header class="topo">
-        <h1> 🌤️ Tempo LDZ </h1>
+        <h1> <svg class="ldz-icon ldz-brand-icon" aria-hidden="true" focusable="false"><use href="#ldz-parcial"/></svg> Tempo LDZ </h1>
     </header>
 
     <!-- CLIMA PRINCIPAL -->
     <section class="resumo-clima">
         <div class="cidade">
-            📍 <span id="cidadeAtual">Buscando localização...</span>
+            <svg class="ldz-icon" aria-hidden="true" focusable="false"><use href="#ldz-pin"/></svg> <span id="cidadeAtual">Buscando localização...</span>
             <details id="detalhesLocalizacao" class="localizacao-privada" hidden>
                 <summary id="controleLocalizacao">Mostrar localização</summary>
                 <span id="coordenadasLocalizacao"></span>
@@ -49,18 +92,18 @@
         </div>
         <div class="dados-resumo">
             <div class="item">
-                🌡️
+                <svg class="ldz-icon" aria-hidden="true" focusable="false"><use href="#ldz-temp"/></svg>
                 <span>Sensação</span>
                 <strong id="sensacaoAtual">--°</strong>
             </div>
             <div class="item">
-                💧
+                <svg class="ldz-icon" aria-hidden="true" focusable="false"><use href="#ldz-gota"/></svg>
                 <span>Umidade</span>
                 <strong id="umidadeAtual">--%</strong>
             </div>
             <div class="item">
                 <div class="vento-container">
-                    <svg class="seta-vento" id="setaVento" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <svg class="seta-vento" id="setaVento" aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M12 2v20M19 9l-7-7-7 7"/>
                     </svg>
                 </div>
@@ -79,11 +122,11 @@
 
 		<a
             href="https://www.cptec.inpe.br/dsat/" target="_blank" rel="noopener noreferrer" class="btn-ipmet">
-            🛰️ Satélite GOES
+            <svg class="ldz-icon" aria-hidden="true" focusable="false"><use href="#ldz-satelite"/></svg> Satélite GOES
         </a>
 		<a
             href="https://www.ipmetradar.com.br/2mobileGis.php" target="_blank" rel="noopener noreferrer" class="btn-ipmet">
-            📡 Ver no IPMet
+            <svg class="ldz-icon" aria-hidden="true" focusable="false"><use href="#ldz-radar"/></svg> Ver no IPMet
         </a>
     </section>
 
@@ -102,16 +145,16 @@
         </div>
         <p id="mensagemBusca" role="status" aria-live="polite"></p>
         <button id="btnBuscar">
-            🔎 Buscar Cidade
+            <svg class="ldz-icon" aria-hidden="true" focusable="false"><use href="#ldz-busca"/></svg> Buscar Cidade
         </button>
         <button id="btnGPS">
-            📍 Meu Local
+            <svg class="ldz-icon" aria-hidden="true" focusable="false"><use href="#ldz-pin"/></svg> Meu Local
         </button>
         <button id="btnRefresh">
-            🔄 Atualizar
+            <svg class="ldz-icon" aria-hidden="true" focusable="false"><use href="#ldz-atualizar"/></svg> Atualizar
         </button>
         <button id="btnModo" class="btn-modo" type="button" aria-label="Modo leve" aria-pressed="false">
-            <span aria-hidden="true">⇄</span> <span id="rotuloModo">Visual automático</span>
+            <svg class="ldz-icon" aria-hidden="true" focusable="false"><use href="#ldz-modo"/></svg> <span id="rotuloModo">Visual automático</span>
         </button>
     </section>
 
@@ -127,13 +170,13 @@
 		<h2>Mais informações</h2>
         <div class="dados-resumo">
             <div class="item">
-                🌅 <span>Nascer do Sol</span> <strong id="sunrise">--:--</strong>
+                <svg class="ldz-icon" aria-hidden="true" focusable="false"><use href="#ldz-nascer"/></svg> <span>Nascer do Sol</span> <strong id="sunrise">--:--</strong>
             </div>
             <div class="item">
-                🌇 <span>Pôr do Sol</span> <strong id="sunset">--:--</strong>
+                <svg class="ldz-icon" aria-hidden="true" focusable="false"><use href="#ldz-por"/></svg> <span>Pôr do Sol</span> <strong id="sunset">--:--</strong>
             </div>
             <div class="item">
-                🕒 <span>Hora da atualização</span> <strong id="horaLocal">--:--</strong>
+                <svg class="ldz-icon" aria-hidden="true" focusable="false"><use href="#ldz-relogio"/></svg> <span>Hora da atualização</span> <strong id="horaLocal">--:--</strong>
             </div>
         </div>
         

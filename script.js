@@ -5,6 +5,17 @@ document.addEventListener("DOMContentLoaded", () => {
 ===================================================== */
 const $ = id => document.getElementById(id);
 
+// Somente nomes e rótulos internos, definidos pelo site, entram no SVG.
+function svgIcone(nome, classe = "", rotulo = "") {
+    const acesso = rotulo ? `role="img" aria-label="${rotulo}"` : 'aria-hidden="true"';
+    return `<svg class="ldz-icon ${classe}" ${acesso} focusable="false"><use href="#ldz-${nome}"/></svg>`;
+}
+
+function textoComIcone(elemento, icone, texto, classe) {
+    elemento.innerHTML = svgIcone(icone, classe);
+    elemento.append(` ${texto}`);
+}
+
 /* =====================================================
    ESTADO GLOBAL
 ===================================================== */
@@ -234,29 +245,29 @@ function atualizarInterface() {
     // Atualizar info de precipitação em tempo real
     const infoChuva = $("infoChuvaAtual");
     if (climaAtual.chuva > 0) {
-        infoChuva.innerHTML = `💧 <strong>${climaAtual.chuva.toFixed(1)}mm</strong> de chuva`;
+        infoChuva.innerHTML = `${svgIcone("gota")} <strong>${climaAtual.chuva.toFixed(1)}mm</strong> de chuva`;
         infoChuva.style.display = "block";
     } else if (climaAtual.probabilidade > 0) {
-        infoChuva.innerHTML = `💧 ${climaAtual.probabilidade}% de probabilidade`;
+        infoChuva.innerHTML = `${svgIcone("gota")} ${climaAtual.probabilidade}% de probabilidade`;
         infoChuva.style.display = "block";
     } else {
         infoChuva.style.display = "none";
     }
 
     if (climaAtual.chuva > 0.5) {
-        $("statusChuva").textContent = "🔴 Chuva Forte";
+        textoComIcone($("statusChuva"), "aviso", "Chuva Forte", "ldz-alerta-forte");
     }
     else if (choveAgora()) {
-        $("statusChuva").textContent = "🌧️ Chovendo agora";
+        textoComIcone($("statusChuva"), "chuva-contorno", "Chovendo agora");
     }
     else if (climaAtual.probabilidade > 40) {
-        $("statusChuva").textContent = "🟡 Chuva Chegando";
+        textoComIcone($("statusChuva"), "aviso", "Chuva Chegando", "ldz-alerta");
     }
     else if (climaAtual.proximaChuva) {
-        $("statusChuva").textContent = "🟡 Chuva nas próximas horas";
+        textoComIcone($("statusChuva"), "aviso", "Chuva nas próximas horas", "ldz-alerta");
     }
     else {
-        $("statusChuva").textContent = "🟢 Tempo Estável";
+        textoComIcone($("statusChuva"), "estavel", "Tempo Estável", "ldz-estavel");
     }
 }
 
@@ -286,9 +297,9 @@ function atualizarDescricao(h) {
     }
 
     if (horasComChuva > 0 || chuvaTotal > 0) {
-        $('descricaoAtual').textContent =
-            `🌧️ ${chuvaTotal.toFixed(1)} mm previstos nas próximas 12 horas` +
-            (horasComChuva > 0 ? `; possibilidade de chuva em ${horasComChuva} dessas horas` : "");
+        textoComIcone($("descricaoAtual"), "chuva-contorno",
+            `${chuvaTotal.toFixed(1)} mm previstos nas próximas 12 horas` +
+            (horasComChuva > 0 ? `; possibilidade de chuva em ${horasComChuva} dessas horas` : ""));
 
         climaAtual.proximaChuva = true;
     } else {
@@ -649,6 +660,7 @@ function atualizarEstrelas() {
     const ciclo = calcularPosicaoDiaNoite();
     const cloud = (climaAtual.cloudCover || 0) / 100;
 
+    document.body.classList.toggle("ldz-icons-dia", ciclo.ehDia);
     if (ciclo.ehDia) {
         stars.style.opacity = 0;
 		document.body.style.color = "#10438f";
@@ -874,50 +886,39 @@ function obterFaseLua(hora) {
     const dias = (hoje - referencia) / 86400000;
     const ciclo = ((dias % 29.53) + 29.53) % 29.53;
 
-    if (ciclo < 1.8) return "🌑";
-    if (ciclo < 5.5) return "🌒";
-    if (ciclo < 9.2) return "🌓";
-    if (ciclo < 12.9) return "🌔";
-    if (ciclo < 16.6) return "🌕";
-    if (ciclo < 20.3) return "🌖";
-    if (ciclo < 24.0) return "🌗";
+    if (ciclo < 1.8) return ["nova", "Lua nova"];
+    if (ciclo < 5.5) return ["crescente-fina", "Lua crescente"];
+    if (ciclo < 9.2) return ["quarto-crescente", "Quarto crescente"];
+    if (ciclo < 12.9) return ["gibosa-crescente", "Lua gibosa crescente"];
+    if (ciclo < 16.6) return ["cheia", "Lua cheia"];
+    if (ciclo < 20.3) return ["gibosa-minguante", "Lua gibosa minguante"];
+    if (ciclo < 24.0) return ["quarto-minguante", "Quarto minguante"];
 
-    return "🌘";
+    return ["minguante-fina", "Lua minguante"];
 }
 
 /* =====================================================
    WEATHER CODE → ÍCONE
 ===================================================== */
 function obterIcone(codigo, ehDia, hora) {
+    if (!ehDia && [0, 1, 2].includes(codigo)) {
+        const [fase, rotulo] = obterFaseLua(hora);
+        if (codigo === 0) return svgIcone(`lua-${fase}`, "ldz-weather-icon", rotulo);
+        return svgIcone(`noite-${fase}`, "ldz-weather-icon", `Parcialmente nublado, ${rotulo.toLowerCase()}`);
+    }
 
-    // Céu limpo
-    if (codigo === 0) return ehDia ? "☀️" : obterFaseLua(hora);
-	
-    // Poucas nuvens
-    if ([1, 2].includes(codigo)) return ehDia ? "🌤️" : `${obterFaseLua(hora)}☁️`;
+    let nome, rotulo;
+    if (codigo === 0) [nome, rotulo] = ["sol", "Céu limpo"];
+    else if ([1, 2].includes(codigo)) [nome, rotulo] = ["parcial", "Parcialmente nublado"];
+    else if (codigo === 3) [nome, rotulo] = ["nuvem", "Nublado"];
+    else if ([45, 48].includes(codigo)) [nome, rotulo] = ["neblina", "Neblina"];
+    else if ([51, 53, 55, 56, 57].includes(codigo)) [nome, rotulo] = ["garoa", "Garoa"];
+    else if ([61, 63, 65, 66, 67, 80, 81, 82].includes(codigo)) [nome, rotulo] = ["chuva", "Chuva"];
+    else if ([71, 73, 75, 77].includes(codigo)) [nome, rotulo] = ["neve", "Neve"];
+    else if ([95, 96, 99].includes(codigo)) [nome, rotulo] = ["trovao", "Trovoada"];
+    else [nome, rotulo] = ehDia ? ["parcial", "Parcialmente nublado"] : ["lua", "Noite"];
 
-    // Nublado
-    if (codigo === 3) return "☁️";
-
-    // Neblina
-    if ([45, 48].includes(codigo)) return "🌫️";
-
-    // Garoa
-    if ([51,53,55,56,57].includes(codigo)) return "🌦️";
-
-    // Chuva
-    if ([61,63,65,66,67].includes(codigo)) return "🌧️";
-
-    // Neve
-    if ([71,73,75,77].includes(codigo)) return "❄️";
-
-    // Pancadas
-    if ([80,81,82].includes(codigo)) return "🌧️";
-
-    // Tempestade
-    if ([95,96,99].includes(codigo)) return "⛈️";
-
-    return ehDia ? "🌤️" : "🌙";
+    return svgIcone(nome, "ldz-weather-icon", rotulo);
 }
 /* =====================================================
    PREVISÃO 12H (COM DADOS DE PRECIPITAÇÃO)
@@ -973,7 +974,7 @@ function renderizar12Horas(hourly, daily) {
             </div>
 
             <div class="chuva">
-                💧 ${infoChuvaCard}
+                ${svgIcone("gota")} ${infoChuvaCard}
             </div>
 
         </div>

@@ -1,0 +1,9 @@
+{
+  "schema": 1,
+  "version": "1.6.5",
+  "tag": "v1.6.5",
+  "apk": "Tempo-LDZ.apk",
+  "size": 25257,
+  "sha256": "29569cb51a81de6b035a455e90f4c566e84ec6a5ecc3ccad4a1bad5235bba98a",
+  "package": "br.com.ldz.tempotv"
+}

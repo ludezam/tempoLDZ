@@ -41,6 +41,10 @@ Desenvolvido por **LDZ**, com HTML, CSS e JavaScript puro. Não exige compilaç�
 
 ## Como usar
 
+### Instalar no Microsoft Edge
+
+Abra a página do Tempo LDZ em uma janela normal do Edge e use o ícone de instalação na barra de endereço. O app abre em uma janela própria. A previsão e o radar continuam dependendo da internet.
+
 ### Localização automática
 
 1. Abra o site e permita acesso à localização.
@@ -358,7 +362,7 @@ O `index.html` carrega CSS e JavaScript com um identificador de versão:
 <script defer src="script.js?v=20261111-4"></script>
 ```
 
-Ao alterar os recursos, atualize esse identificador para evitar que navegadores reutilizem uma versão antiga. A publicação e a atualização dos caches não são instantâneas. O projeto não possui service worker.
+Ao alterar os recursos, atualize esse identificador para evitar que navegadores reutilizem uma versão antiga. A publicação e a atualização dos caches não são instantâneas. O service worker fica restrito ao Tempo LDZ e mostra um aviso ao abrir o app sem conexão. Ele não armazena previsões nem altera o cache dos arquivos do site.
 
 ## Manutenção
 

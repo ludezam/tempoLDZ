@@ -8,6 +8,7 @@
     <meta name="apple-mobile-web-app-title" content="🌦️ Tempo LDZ">
     <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="180x180" href="apple-touch-icon.png">
+    <link rel="manifest" href="manifest.webmanifest">
     <link rel="stylesheet" href="style.css?v=20261126-lua-1">
     <script defer src="script.js?v=20261126-lua-1"></script>
 </head>
@@ -196,6 +197,13 @@
             Dados fornecidos por Open-Meteo, RainViewer e IPMet
         </p>
     </footer>
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('./sw.js', { scope: './' }).catch(error => {
+                console.warn('Tempo LDZ: não foi possível ativar o service worker.', error);
+            });
+        }
+    </script>
 </body>
 </html>
 

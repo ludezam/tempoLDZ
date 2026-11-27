@@ -27,7 +27,10 @@ let consultaClimaAtiva;
 let ultimaAtualizacao = 0;
 let localizacaoGPS = null;
 const INTERVALO_CLIMA = 300000;
-const CODIGOS_CHUVA = [51, 53, 55, 56, 57, 61, 63, 65, 66, 67, 80, 81, 82, 95, 96, 99];
+const CODIGOS_GAROA = [51, 53, 55, 56, 57];
+const CODIGOS_CHUVA_SEM_TROVAO = [61, 63, 65, 66, 67, 80, 81, 82];
+const CODIGOS_TROVOADA = [95, 96, 99];
+const CODIGOS_CHUVA = [...CODIGOS_GAROA, ...CODIGOS_CHUVA_SEM_TROVAO, ...CODIGOS_TROVOADA];
 
 // Datas da API são horários civis da cidade, sem offset. UTC aqui serve apenas
 // como base de comparação, impedindo interferência do fuso do dispositivo.
@@ -55,6 +58,7 @@ let climaAtual = {
     sunrise: null,
     sunset: null,
     horarioLocal: null,
+    deslocamentoUTC: 0,
     proximaChuva: false
 };
 
@@ -204,6 +208,8 @@ async function atualizarClima() {
         climaAtual.sunrise = dados.daily.sunrise[0];
         climaAtual.sunset = dados.daily.sunset[0];
         climaAtual.horarioLocal = dados.current.time;
+        climaAtual.deslocamentoUTC = Number.isFinite(dados.utc_offset_seconds)
+            ? dados.utc_offset_seconds : 0;
 
         atualizarMapa();
         renderizar12Horas(dados.hourly, dados.daily);
@@ -1063,31 +1069,37 @@ function atualizarSetaVento() {
 /* =====================================================
    FASE DA LUA - OBTER ÍCONE 
 ===================================================== */
+const FASES_LUA = [
+    ["nova", "Lua nova"],
+    ["crescente-fina", "Lua crescente"],
+    ["quarto-crescente", "Quarto crescente"],
+    ["gibosa-crescente", "Lua gibosa crescente"],
+    ["cheia", "Lua cheia"],
+    ["gibosa-minguante", "Lua gibosa minguante"],
+    ["quarto-minguante", "Quarto minguante"],
+    ["minguante-fina", "Lua minguante"]
+];
+
 function obterFaseLua(hora) {
-
-    const hoje = hora ? dataCidade(hora) : obterHoraCidade();
-    const referencia = new Date("2024-01-11");
-    const dias = (hoje - referencia) / 86400000;
-    const ciclo = ((dias % 29.53) + 29.53) % 29.53;
-
-    if (ciclo < 1.8) return ["nova", "Lua nova"];
-    if (ciclo < 5.5) return ["crescente-fina", "Lua crescente"];
-    if (ciclo < 9.2) return ["quarto-crescente", "Quarto crescente"];
-    if (ciclo < 12.9) return ["gibosa-crescente", "Lua gibosa crescente"];
-    if (ciclo < 16.6) return ["cheia", "Lua cheia"];
-    if (ciclo < 20.3) return ["gibosa-minguante", "Lua gibosa minguante"];
-    if (ciclo < 24.0) return ["quarto-minguante", "Quarto minguante"];
-
-    return ["minguante-fina", "Lua minguante"];
+    // Converte a hora civil de cada cartão em um instante real para a fase.
+    const instante = new Date(dataCidade(hora).getTime() - climaAtual.deslocamentoUTC * 1000);
+    const { phase } = astronomiaLocal.getMoonIllumination(instante);
+    return FASES_LUA[Math.round(phase * 8) % FASES_LUA.length];
 }
 
 /* =====================================================
    WEATHER CODE → ÍCONE
 ===================================================== */
 function obterIcone(codigo, ehDia, hora) {
-    if (!ehDia && [0, 1, 2].includes(codigo)) {
+    const garoa = CODIGOS_GAROA.includes(codigo);
+    const chuva = CODIGOS_CHUVA_SEM_TROVAO.includes(codigo);
+    if (!ehDia && ([0, 1, 2].includes(codigo) || garoa || chuva)) {
         const [fase, rotulo] = obterFaseLua(hora);
         if (codigo === 0) return svgIcone(`lua-${fase}`, "ldz-weather-icon", rotulo);
+        if (garoa || chuva) {
+            return svgIcone(`chuva-noite-${fase}`, "ldz-weather-icon",
+                `${garoa ? "Garoa" : "Chuva"}, ${rotulo.toLowerCase()}`);
+        }
         return svgIcone(`noite-${fase}`, "ldz-weather-icon", `Parcialmente nublado, ${rotulo.toLowerCase()}`);
     }
 
@@ -1096,10 +1108,10 @@ function obterIcone(codigo, ehDia, hora) {
     else if ([1, 2].includes(codigo)) [nome, rotulo] = ["parcial", "Parcialmente nublado"];
     else if (codigo === 3) [nome, rotulo] = ["nuvem", "Nublado"];
     else if ([45, 48].includes(codigo)) [nome, rotulo] = ["neblina", "Neblina"];
-    else if ([51, 53, 55, 56, 57].includes(codigo)) [nome, rotulo] = ["garoa", "Garoa"];
-    else if ([61, 63, 65, 66, 67, 80, 81, 82].includes(codigo)) [nome, rotulo] = ["chuva", "Chuva"];
+    else if (garoa) [nome, rotulo] = ["garoa", "Garoa"];
+    else if (chuva) [nome, rotulo] = ["chuva", "Chuva"];
     else if ([71, 73, 75, 77].includes(codigo)) [nome, rotulo] = ["neve", "Neve"];
-    else if ([95, 96, 99].includes(codigo)) [nome, rotulo] = ["trovao", "Trovoada"];
+    else if (CODIGOS_TROVOADA.includes(codigo)) [nome, rotulo] = ["trovao", "Trovoada"];
     else [nome, rotulo] = ehDia ? ["parcial", "Parcialmente nublado"] : ["lua", "Noite"];
 
     return svgIcone(nome, "ldz-weather-icon", rotulo);

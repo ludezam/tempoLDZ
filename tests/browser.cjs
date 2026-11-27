@@ -9,8 +9,12 @@ const root = path.resolve(__dirname, '..');
 function previsao(temperatura = 22, chuva = .1, codigo = 51) {
     const time = Array.from({ length: 48 }, (_, i) =>
         `2026-11-${i < 24 ? '11' : '12'}T${String(i % 24).padStart(2, '0')}:00`);
+    const weatherCodes = time.map(() => 0);
+    for (const [i, code] of [[22, 63], [23, 51], [24, 53], [25, 80], [26, 95], [27, 1], [31, 51], [32, 63]]) {
+        weatherCodes[i] = code;
+    }
     return {
-        timezone: 'America/Sao_Paulo',
+        timezone: 'America/Sao_Paulo', utc_offset_seconds: -10800,
         current: { time: '2026-11-11T21:45', temperature_2m: temperatura,
             apparent_temperature: 26, relative_humidity_2m: 93, wind_speed_10m: 6,
             wind_direction_10m: 75, precipitation: chuva, cloud_cover: 100, weather_code: codigo },
@@ -19,7 +23,7 @@ function previsao(temperatura = 22, chuva = .1, codigo = 51) {
             sunset: ['2026-11-11T18:30', '2026-11-12T18:31'] },
         hourly: { time, temperature_2m: time.map(() => temperatura),
             precipitation_probability: time.map(() => 65), precipitation: time.map(() => .2),
-            weather_code: time.map(() => 0) }
+            weather_code: weatherCodes }
     };
 }
 
@@ -102,9 +106,31 @@ function previsao(temperatura = 22, chuva = .1, codigo = 51) {
             assert.equal(await page.locator('.drop').count(), leve ? 50 : 100);
             assert.equal(await page.locator('.previsao-card').count(), 12);
             assert.equal((await page.locator('.previsao-card .hora').first().textContent()).trim(), '22:00');
-            assert.equal((await page.locator('.previsao-card .icone').nth(8).textContent()).trim(), '☀️');
+            const cartoes = page.locator('.previsao-card');
+            const icones = cartoes.locator('.icone svg');
+            const hrefs = await icones.locator('use').evaluateAll(nodes => nodes.map(node => node.getAttribute('href')));
+            assert.equal(await icones.count(), 12); // Um único SVG por cartão.
+            const fase = hrefs[5].match(/^#ldz-noite-(.+)$/)?.[1];
+            assert.ok(fase);
+            for (const [i, hora, rotulo] of [[0, '22:00', 'Chuva'], [1, '23:00', 'Garoa'],
+                [2, '00:00', 'Garoa'], [3, '01:00', 'Chuva']]) {
+                assert.equal((await cartoes.nth(i).locator('.hora').textContent()).trim(), hora);
+                assert.equal(hrefs[i], `#ldz-chuva-noite-${fase}`);
+                assert.match(await icones.nth(i).getAttribute('aria-label'), new RegExp(`^${rotulo},`));
+            }
+            assert.equal(hrefs[4], '#ldz-trovao');
+            assert.equal(hrefs[8], '#ldz-sol');
+            assert.equal(hrefs[9], '#ldz-garoa');
+            assert.equal(hrefs[10], '#ldz-chuva');
+            assert.match(await cartoes.nth(1).locator('.chuva').textContent(), /0\.2mm - 65%/);
+            assert.equal(await page.locator('symbol[id^="ldz-chuva-noite-"]').count(), 8);
+            assert.equal(await page.locator('symbol[id^="ldz-chuva-noite-"] use').evaluateAll(
+                nodes => nodes.every(node => document.getElementById(node.getAttribute('href').slice(1)))), true);
+            if (process.env.TEMPO_ICON_PREVIEW && perfil === 'desktop') {
+                await cartoes.nth(1).screenshot({ path: process.env.TEMPO_ICON_PREVIEW });
+            }
             assert.match(await page.locator('#statusChuva').textContent(), /Chovendo agora/);
-            assert.equal(await page.locator('#horaLocal').textContent(), '21:45');
+            assert.equal(await page.locator('#horaLocal').count(), 0);
             assert.equal(await page.locator('#cidadeAtual').textContent(), 'Local atual');
             assert.equal(await page.locator('#cidadeAtual').getAttribute('title'), null);
             assert.equal(await page.locator('#coordenadasLocalizacao').textContent(), '');

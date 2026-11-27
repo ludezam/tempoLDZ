@@ -139,6 +139,7 @@ function iniciarGPS(forcarAtualizacao = false) {
             if (versao !== versaoLocalizacao) return;
             LAT = pos.coords.latitude;
             LON = pos.coords.longitude;
+            atualizarLua();
             // A API de busca não oferece geocodificação reversa neste endpoint.
             $("cidadeAtual").textContent = "Local atual";
             localizacaoGPS = { latitude: LAT, longitude: LON, accuracy: pos.coords.accuracy };
@@ -355,6 +356,7 @@ function selecionarCidade(local) {
     ++versaoLocalizacao;
     LAT = local.latitude;
     LON = local.longitude;
+    atualizarLua();
     campoCidade.value = local.name;
     $("cidadeAtual").textContent = [local.name, local.admin1, local.country]
         .filter(Boolean).join(", ");
@@ -550,66 +552,249 @@ function atualizarCeu() {
 }
 
 /* =====================================================
-   FASE DA LUA / SOL E LUA
+   SOL / LUA DO FUNDO
 ===================================================== */
-function atualizarFaseVisualLua() {
-    const moon = document.querySelector(".moon");
+/* SunCalc v1.9.0, reduzido às funções de posição e iluminação.
+ * https://github.com/mourner/suncalc/tree/v1.9.0
+ *
+Copyright (c) 2014, Vladimir Agafonkin
+All rights reserved.
 
-	const hoje = climaAtual.horarioLocal ? dataCidade(climaAtual.horarioLocal) : new Date();
-	const referencia = new Date("2024-01-11");
-    const dias = (hoje - referencia) / 86400000;
-    const ciclo = ((dias % 29.53) + 29.53) % 29.53;
-    const fase = ciclo / 29.53;
-    const iluminacao = (1 - Math.cos(fase * 2 * Math.PI)) / 2;
+Redistribution and use in source and binary forms, with or without modification, are
+permitted provided that the following conditions are met:
 
-    const deslocamento = iluminacao * 110;
+   1. Redistributions of source code must retain the above copyright notice, this list of
+      conditions and the following disclaimer.
 
-    moon.style.setProperty(
-        "--fase-lua",
-        `${deslocamento}px`
-    );
-	// só revela depois de calcular
-	moon.style.opacity = "";
+   2. Redistributions in binary form must reproduce the above copyright notice, this list
+      of conditions and the following disclaimer in the documentation and/or other materials
+      provided with the distribution.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
+EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR
+TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
+const astronomiaLocal = (() => {
+    var PI   = Math.PI,
+        sin  = Math.sin,
+        cos  = Math.cos,
+        tan  = Math.tan,
+        asin = Math.asin,
+        atan = Math.atan2,
+        acos = Math.acos,
+        rad  = PI / 180;
+
+    // sun calculations are based on http://aa.quae.nl/en/reken/zonpositie.html formulas
+
+
+    // date/time constants and conversions
+
+    var dayMs = 1000 * 60 * 60 * 24,
+        J1970 = 2440588,
+        J2000 = 2451545;
+
+    function toJulian(date) { return date.valueOf() / dayMs - 0.5 + J1970; }
+    function toDays(date)   { return toJulian(date) - J2000; }
+
+
+    // general calculations for position
+
+    var e = rad * 23.4397; // obliquity of the Earth
+
+    function rightAscension(l, b) { return atan(sin(l) * cos(e) - tan(b) * sin(e), cos(l)); }
+    function declination(l, b)    { return asin(sin(b) * cos(e) + cos(b) * sin(e) * sin(l)); }
+
+    function azimuth(H, phi, dec)  { return atan(sin(H), cos(H) * sin(phi) - tan(dec) * cos(phi)); }
+    function altitude(H, phi, dec) { return asin(sin(phi) * sin(dec) + cos(phi) * cos(dec) * cos(H)); }
+
+    function siderealTime(d, lw) { return rad * (280.16 + 360.9856235 * d) - lw; }
+
+    function astroRefraction(h) {
+        if (h < 0) // the following formula works for positive altitudes only.
+            h = 0; // if h = -0.08901179 a div/0 would occur.
+
+        // formula 16.4 of "Astronomical Algorithms" 2nd edition by Jean Meeus (Willmann-Bell, Richmond) 1998.
+        // 1.02 / tan(h + 10.26 / (h + 5.10)) h in degrees, result in arc minutes -> converted to rad:
+        return 0.0002967 / Math.tan(h + 0.00312536 / (h + 0.08901179));
+    }
+
+    // general sun calculations
+
+    function solarMeanAnomaly(d) { return rad * (357.5291 + 0.98560028 * d); }
+
+    function eclipticLongitude(M) {
+
+        var C = rad * (1.9148 * sin(M) + 0.02 * sin(2 * M) + 0.0003 * sin(3 * M)), // equation of center
+            P = rad * 102.9372; // perihelion of the Earth
+
+        return M + C + P + PI;
+    }
+
+    function sunCoords(d) {
+
+        var M = solarMeanAnomaly(d),
+            L = eclipticLongitude(M);
+
+        return {
+            dec: declination(L, 0),
+            ra: rightAscension(L, 0)
+        };
+    }
+
+
+    var SunCalc = {};
+
+    SunCalc.getPosition = function (date, lat, lng) {
+
+        var lw  = rad * -lng,
+            phi = rad * lat,
+            d   = toDays(date),
+
+            c  = sunCoords(d),
+            H  = siderealTime(d, lw) - c.ra;
+
+        return {
+            azimuth: azimuth(H, phi, c.dec),
+            altitude: altitude(H, phi, c.dec)
+        };
+    };
+
+    // moon calculations, based on http://aa.quae.nl/en/reken/hemelpositie.html formulas
+
+    function moonCoords(d) { // geocentric ecliptic coordinates of the moon
+
+        var L = rad * (218.316 + 13.176396 * d), // ecliptic longitude
+            M = rad * (134.963 + 13.064993 * d), // mean anomaly
+            F = rad * (93.272 + 13.229350 * d),  // mean distance
+
+            l  = L + rad * 6.289 * sin(M), // longitude
+            b  = rad * 5.128 * sin(F),     // latitude
+            dt = 385001 - 20905 * cos(M);  // distance to the moon in km
+
+        return {
+            ra: rightAscension(l, b),
+            dec: declination(l, b),
+            dist: dt
+        };
+    }
+
+    SunCalc.getMoonPosition = function (date, lat, lng) {
+
+        var lw  = rad * -lng,
+            phi = rad * lat,
+            d   = toDays(date),
+
+            c = moonCoords(d),
+            H = siderealTime(d, lw) - c.ra,
+            h = altitude(H, phi, c.dec),
+            // formula 14.1 of "Astronomical Algorithms" 2nd edition by Jean Meeus (Willmann-Bell, Richmond) 1998.
+            pa = atan(sin(H), tan(phi) * cos(c.dec) - sin(c.dec) * cos(H));
+
+        // Corrige a paralaxe lunar antes de estimar a refração junto ao horizonte.
+        h -= asin(6378.14 / c.dist * cos(h));
+        h += astroRefraction(h);
+
+        return {
+            azimuth: azimuth(H, phi, c.dec),
+            altitude: h,
+            distance: c.dist,
+            parallacticAngle: pa
+        };
+    };
+
+
+    // calculations for illumination parameters of the moon,
+    // based on http://idlastro.gsfc.nasa.gov/ftp/pro/astro/mphase.pro formulas and
+    // Chapter 48 of "Astronomical Algorithms" 2nd edition by Jean Meeus (Willmann-Bell, Richmond) 1998.
+
+    SunCalc.getMoonIllumination = function (date) {
+
+        var d = toDays(date || new Date()),
+            s = sunCoords(d),
+            m = moonCoords(d),
+
+            sdist = 149598000, // distance from Earth to Sun in km
+
+            dot = sin(s.dec) * sin(m.dec) + cos(s.dec) * cos(m.dec) * cos(s.ra - m.ra),
+            phi = acos(Math.max(-1, Math.min(1, dot))),
+            inc = atan(sdist * sin(phi), m.dist - sdist * cos(phi)),
+            angle = atan(cos(s.dec) * sin(s.ra - m.ra), sin(s.dec) * cos(m.dec) -
+                    cos(s.dec) * sin(m.dec) * cos(s.ra - m.ra));
+
+        return {
+            fraction: (1 + cos(inc)) / 2,
+            phase: 0.5 + 0.5 * inc * (angle < 0 ? -1 : 1) / Math.PI,
+            angle: angle
+        };
+    };
+    return SunCalc;
+})();
+
+const limitar01 = valor => Math.max(0, Math.min(1, valor));
+let inclinacaoLua = null;
+
+// O lado iluminado começa à direita. A borda esquerda é o contorno
+// do disco; a outra curva é o terminador (linha entre luz e sombra).
+function desenharSombraLua(fracaoIluminada) {
+    const curva = 1 - 2 * limitar01(fracaoIluminada);
+    const raio = Math.abs(curva) * 50;
+    const terminador = raio < 0.01
+        ? "L50 0"
+        : `A${raio.toFixed(3)} 50 0 0 ${curva > 0 ? 0 : 1} 50 0`;
+    return `M50 0A50 50 0 0 0 50 100${terminador}Z`;
+}
+
+function atualizarLua(agora = new Date()) {
+    if (document.hidden || !Number.isFinite(LAT) || !Number.isFinite(LON)) return;
+    const lua = document.querySelector(".moon");
+    const graus = 180 / Math.PI;
+    // As coordenadas já definem o céu local; um instante UTC real evita
+    // aplicar o fuso da cidade duas vezes ou usar a hora da última previsão.
+    const pos = astronomiaLocal.getMoonPosition(agora, LAT, LON);
+    const alt = pos.altitude * graus;
+    const solAlt = astronomiaLocal.getPosition(agora, LAT, LON).altitude * graus;
+    if (alt <= 0 || solAlt >= 0) {
+        lua.style.opacity = 0;
+        return;
+    }
+
+    const fase = astronomiaLocal.getMoonIllumination(agora);
+    // Projeção estilizada: leste à esquerda, oeste à direita.
+    const x = 50 + 36 * Math.sin(pos.azimuth) * Math.cos(pos.altitude);
+    const y = 82 - 68 * (Math.min(alt, 90) / 90);
+    // Converte a orientação em relação ao zênite para rotação CSS.
+    const alvo = (pos.parallacticAngle - fase.angle) * graus - 90;
+    if (inclinacaoLua === null) inclinacaoLua = alvo;
+    else inclinacaoLua += (((alvo - inclinacaoLua + 180) % 360 + 360) % 360) - 180;
+
+    lua.style.setProperty("--lua-x", `${x.toFixed(2)}vw`);
+    lua.style.setProperty("--lua-y", `${y.toFixed(2)}vh`);
+    lua.style.setProperty("--lua-inclinacao", `${inclinacaoLua.toFixed(2)}deg`);
+    $("sombraLua").setAttribute("d", desenharSombraLua(fase.fraction));
+    const nuvens = limitar01(climaAtual.cloudCover / 100);
+    lua.style.opacity = (0.96 - nuvens * 0.60) * limitar01(alt / 3)
+        * limitar01(-solAlt / 6) * limitar01(fase.fraction / 0.09);
 }
 
 function atualizarSolLua() {
     const sun = document.querySelector(".sun");
-    const moon = document.querySelector(".moon");
-	atualizarFaseVisualLua();
     const ciclo = calcularPosicaoDiaNoite();
-    const cloudFactor = climaAtual.cloudCover / 100;
-
+    const nuvens = limitar01(climaAtual.cloudCover / 100);
     if (ciclo.ehDia) {
-        // Sol
         const p = ciclo.progresso;
-        const x = 5 + (p * 90);
-        const y = 78 - (Math.sin(p * Math.PI) * 65);
-
-        sun.style.left = x + "vw";
-        sun.style.top = y + "vh";
-        sun.style.opacity = Math.max(0.25, 1 - (cloudFactor * 0.65));
-        sun.style.filter = `brightness(${1.2 - cloudFactor * 0.5})`;
-        moon.style.opacity = 0;
-    }
-    else {
-        // Lua
-        let moonStart = ciclo.por;
-        let moonEnd = ciclo.nascer + 86400000;
-
-        if (ciclo.tempoAtual < ciclo.nascer) {
-            moonStart = ciclo.por - 86400000;
-            moonEnd = ciclo.nascer;
-        }
-
-        const p = (ciclo.tempoAtual - moonStart) / (moonEnd - moonStart);
-        const x = 5 + (p * 90);
-        const y = 78 - (Math.sin(p * Math.PI) * 65);
-
-        moon.style.left = x + "vw";
-        moon.style.top = y + "vh";
-        moon.style.opacity = Math.max(0.15, 0.85 - (cloudFactor * 0.6));
+        sun.style.setProperty("--sol-x", `${5 + p * 90}vw`);
+        sun.style.setProperty("--sol-y", `${78 - Math.sin(p * Math.PI) * 65}vh`);
+        sun.style.opacity = Math.max(0.25, 1 - nuvens * 0.65);
+    } else {
         sun.style.opacity = 0;
     }
+    atualizarLua();
 }
 
 /* =====================================================
@@ -1019,10 +1204,15 @@ $('btnRefresh').addEventListener('click', () => { window.location.reload(); });
 setInterval(() => {
     if (!document.hidden) atualizarClima();
 }, INTERVALO_CLIMA);
+// Só reposiciona o disco enquanto a página está visível, sem consultar a rede.
+setInterval(atualizarLua, 30000);
 
 document.addEventListener("visibilitychange", () => {
     document.documentElement.classList.toggle("pagina-oculta", document.hidden);
-    if (!document.hidden && Date.now() - ultimaAtualizacao >= INTERVALO_CLIMA) atualizarClima();
+    if (!document.hidden) {
+        atualizarLua();
+        if (Date.now() - ultimaAtualizacao >= INTERVALO_CLIMA) atualizarClima();
+    }
 });
 
 /* =====================================================

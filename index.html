@@ -8,8 +8,8 @@
     <meta name="apple-mobile-web-app-title" content="🌦️ Tempo LDZ">
     <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="180x180" href="apple-touch-icon.png">
-    <link rel="stylesheet" href="style.css?v=20261126-astro-1">
-    <script defer src="script.js?v=20261126-astro-1"></script>
+    <link rel="stylesheet" href="style.css?v=20261126-lua-1">
+    <script defer src="script.js?v=20261126-lua-1"></script>
 </head>
 
 <body>
@@ -58,7 +58,11 @@
     <!-- FUNDO DINÂMICO -->
     <div id="sky"></div>
     <div class="sun"></div>
-    <div class="moon"></div>
+    <div class="moon" aria-hidden="true">
+        <svg class="moon-shade" viewBox="0 0 100 100" focusable="false">
+            <path id="sombraLua"/>
+        </svg>
+    </div>
     <div class="stars-layer" id="stars"></div>
     <div class="cloud-layer cloud-back" id="cloudBack"></div>
     <div class="cloud-layer cloud-front" id="cloudFront"></div>

@@ -48,127 +48,49 @@ body{
 /* =====================================================
    SOL
 ===================================================== */
-.sun{
+.sun,
+.moon {
    opacity:0;
    position:fixed;
-   width:90px;
-   height:90px;
-   border-radius:50%;
-   background: radial-gradient(circle, #fff8c7 0%, #ffe27a 40%, #ffba3a 70%, transparent 100%);
-   box-shadow: 0 0 30px rgba(255,220,120,.8), 0 0 80px rgba(255,190,50,.5), 0 0 160px rgba(255,180,70,.25);
+   top:0;
+   left:0;
    pointer-events:none;
-   transition: opacity 1s linear, left 1s linear, top 1s linear, filter 1s linear;
+   transition:transform 1s linear, opacity 1s linear;
+}
+
+.sun {
+   width:164px;
+   height:164px;
+   background:url("sol.webp") center / contain no-repeat;
+   transform:translate3d(calc(var(--sol-x, 50vw) - 37px), calc(var(--sol-y, 70vh) - 37px), 0);
    z-index:-5;
 }
 
-/* =====================================================
-   LUA
-===================================================== */
-.moon{
-   opacity:0;
-   position:fixed;
+/* A textura é estática; só a posição do disco e a sombra mudam. */
+.moon {
    width:90px;
    height:90px;
+   background:url("lua.webp") center / contain no-repeat;
    border-radius:50%;
-   background: radial-gradient(circle at 30% 30%, #ffffff 0%, #f1f3f6 25%, #d7dae0 75%, #b8bcc3 100%);
-   box-shadow: 0 0 25px rgba(255,255,255,.3), 0 0 60px rgba(255,255,255,.15);
-   pointer-events:none;
-   transition:all 1s linear;
+   overflow:hidden;
+   transform:translate3d(calc(var(--lua-x, 50vw) - 50%), calc(var(--lua-y, 70vh) - 50%), 0);
    z-index:-6;
-   overflow: hidden;
 }
-.moon::before{
-    content: "";
-    position: absolute;
-    inset: 0;
-    border-radius: 50%;
-    pointer-events: none;
 
-    background:
-        /* Mare Imbrium */
-        radial-gradient(
-            circle at 35% 30%,
-            rgba(120,120,120,.15) 0%,
-            rgba(120,120,120,.15) 9%,
-            transparent 14%
-        ),
-        /* Oceanus Procellarum */
-        radial-gradient(
-            circle at 28% 48%,
-            rgba(100,100,100,.12) 0%,
-            rgba(100,100,100,.12) 11%,
-            transparent 17%
-        ),
-        /* Mare Serenitatis */
-        radial-gradient(
-            circle at 58% 28%,
-            rgba(130,130,130,.12) 0%,
-            rgba(130,130,130,.12) 6%,
-            transparent 10%
-        ),
-        /* Mare Tranquillitatis */
-        radial-gradient(
-            circle at 63% 42%,
-            rgba(120,120,120,.10) 0%,
-            rgba(120,120,120,.10) 7%,
-            transparent 11%
-        ),
-        /* Mare Nubium */
-        radial-gradient(
-            circle at 45% 68%,
-            rgba(110,110,110,.12) 0%,
-            rgba(110,110,110,.12) 8%,
-            transparent 13%
-        ),
-        /* Crateras pequenas */
-        radial-gradient(
-            circle at 70% 62%,
-            rgba(80,80,80,.15) 0 2px,
-            transparent 3px
-        ),
-        radial-gradient(
-            circle at 22% 70%,
-            rgba(80,80,80,.12) 0 3px,
-            transparent 4px
-        ),
-        radial-gradient(
-            circle at 75% 20%,
-            rgba(80,80,80,.12) 0 2px,
-            transparent 3px
-        );
-    opacity: .75;
-	filter: drop-shadow(1px 1px 1px rgba(0,0,0,.12)) drop-shadow(-1px -1px 1px rgba(255,255,255,.08));
-    z-index: 1;
+.moon-shade {
+   display:block;
+   width:100%;
+   height:100%;
+   fill:#090f1d;
+   opacity:.93;
+   transform:rotate(var(--lua-inclinacao, 0deg));
+   transition:transform 1s linear;
 }
-.moon::after{
-    content: "";
-    position: absolute;
 
-    width: 120%;
-    height: 100%;
+.modo-leve :is(.sun, .moon, .moon-shade) { transition:none; }
 
-    top: 0;
-    left: 0;
-
-    border-radius: 50%;
-
-    background:
-        radial-gradient(
-            circle at center,
-            rgba(57,60,69,.92) 0%,
-            rgba(57,60,69,.96) 75%,
-            rgba(40,42,50,1) 100%
-        );
-
-    transform:
-        translateX(calc(var(--fase-lua, 0px) * -1));
-
-    transition:
-        transform 1s linear;
-
-    z-index: 2;
-
-    pointer-events: none;
+@media (prefers-reduced-motion:reduce) {
+   :is(.sun, .moon, .moon-shade) { transition:none; }
 }
 
 /* =====================================================
@@ -722,8 +644,6 @@ footer{
 .modo-leve .rain-layer { opacity: .18; }
 .modo-leve .star,
 .modo-leve .calor-extremo::after { animation: none; }
-.modo-leve .sun,
-.modo-leve .moon { box-shadow: none; }
 .modo-leve #sky { transition: none; }
 
 

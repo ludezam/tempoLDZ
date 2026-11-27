@@ -464,14 +464,49 @@ function usarGPS() {
 /* =====================================================
    CÉU DINÂMICO - BASEADO EM NASCER/PÔR DO SOL
 ===================================================== */
+const CORES_CEU_DIA = ["#4ea5ff", "#87ceeb", "#82d4ff", "#b0e0e6"];
+const CORES_POENTE = ["#a6add8", "#d9a4bc", "#ffd2a6", "#f6c3ad"];
+const CORES_POENTE_CHUVA = ["#8fa7c2", "#a1adc7", "#b4afca", "#adb2ca"];
+const CORES_CEU_NOITE = ["#020611", "#040a18", "#060e23", "#071028"];
+
+function misturarCoresCeu(inicio, fim, t) {
+    return inicio.map((cor, i) => {
+        const canais = [1, 3, 5].map(j => {
+            const a = parseInt(cor.slice(j, j + 2), 16);
+            const b = parseInt(fim[i].slice(j, j + 2), 16);
+            return Math.round(a + (b - a) * t);
+        });
+        return `rgb(${canais.join(", ")})`;
+    });
+}
+
+function gradientePoente(ciclo, chuvoso) {
+    const p = ciclo.progresso;
+    const paleta = chuvoso ? CORES_POENTE_CHUVA : CORES_POENTE;
+    const t = ciclo.ehDia ? Math.min(1, (p - 0.65) / 0.30) : Math.max(0, 1 - p / 0.1);
+    const origem = ciclo.ehDia ? CORES_CEU_DIA : CORES_CEU_NOITE;
+    const cores = misturarCoresCeu(origem, paleta, t);
+    const brilho = chuvoso && t > 0
+        ? `radial-gradient(ellipse at ${ciclo.ehDia ? 5 + p * 90 : 95}% 76%, rgba(255, 205, 164, ${(t * 0.52).toFixed(3)}) 0%, transparent 42%), `
+        : "";
+    const meio = 30 + 22 * t;
+    const horizonte = 70 + 12 * t;
+    return `${brilho}linear-gradient(180deg, ${cores[0]} 0%, ${cores[1]} ${meio}%, ${cores[2]} ${horizonte}%, ${cores[3]} 100%)`;
+}
+
 function atualizarCeu() {
     const sky = document.getElementById("sky");
     const ciclo = calcularPosicaoDiaNoite();
     let gradiente = "";
     const p = ciclo.progresso;
     const nuvens = climaAtual.cloudCover / 100;
+    const entardecer = ciclo.ehDia ? p >= 0.65 : p < 0.1;
+    document.body.classList.toggle("ldz-entardecer", entardecer);
+    document.body.classList.toggle("ldz-crepusculo", entardecer && !ciclo.ehDia);
 
-    if (ciclo.ehDia) {
+    if (entardecer) {
+        gradiente = gradientePoente(ciclo, choveAgora());
+    } else if (ciclo.ehDia) {
         // ☀️ CICLO DIURNO (0 = nascer, 1 = pôr)
 
         if (p < 0.15) {
@@ -492,49 +527,17 @@ function atualizarCeu() {
                 #bce7ff ${30 + t * 10}%, 
                 #e0f6ff 100%)`;
         }
-        else if (p < 0.65) {
-            // ☀️ Meio do dia (35-65% do dia)
-            gradiente = `linear-gradient(180deg, 
-                #4ea5ff 0%, 
-                #87ceeb 30%, 
-                #82d4ff 70%, 
-                #b0e0e6 100%)`;
-        }
-        else if (p < 0.85) {
-            // 🌇 Transição para entardecer (65-85% do dia)
-            const t = (p - 0.65) / 0.2;
-            gradiente = `linear-gradient(180deg, 
-                #ff8c42 ${0 + t * 20}%, 
-                #ff9d5c ${20 + t * 20}%, 
-                #ffa500 ${40 + t * 20}%, 
-                #3f6ed7 ${60 + t * 20}%, 
-                #1a3a52 100%)`;
-        }
         else {
-            // 🌅 Pôr do sol (85-100% do dia)
-            const t = (p - 0.85) / 0.15;
-            gradiente = `linear-gradient(180deg, 
-                #ff4500 ${0 + t * 10}%, 
-                #ff6b5b ${10 + t * 15}%, 
-                #ff8c69 ${25 + t * 15}%, 
-                #ffa07a ${40 + t * 10}%, 
-                #8b6341 ${50 + t * 15}%, 
-                #2c1810 ${65 + t * 20}%, 
-                #020611 100%)`;
+            // ☀️ Meio do dia (35-65% do dia)
+            gradiente = `linear-gradient(180deg,
+                ${CORES_CEU_DIA[0]} 0%,
+                ${CORES_CEU_DIA[1]} 30%,
+                ${CORES_CEU_DIA[2]} 70%,
+                ${CORES_CEU_DIA[3]} 100%)`;
         }
     } else {
         // 🌙 CICLO NOTURNO (0 = pôr, 1 = nascer)
-
-        if (p < 0.1) {
-            // 🌆 Crepúsculo vespertino (0-10% da noite)
-            const t = p / 0.1;
-            gradiente = `linear-gradient(180deg, 
-                #4a235a ${0}%, 
-                #1a0033 ${30 + t * 20}%, 
-                #0a0015 ${60 + t * 20}%, 
-                #020611 100%)`;
-        }
-        else if (p < 0.9) {
+        if (p < 0.9) {
             // 🌙 Noite profunda (10-90% da noite)
             gradiente = `linear-gradient(180deg, #020611 0%, #071028 100%)`;
         }
@@ -552,7 +555,7 @@ function atualizarCeu() {
     }
 
     // Aplicar efeito de nuvens ao gradiente
-    const brilho = 1 - (nuvens * 0.3);
+    const brilho = 1 - nuvens * (entardecer ? 0.08 : 0.3);
     sky.style.background = gradiente;
     sky.style.filter = `brightness(${brilho})`;
 }
@@ -853,7 +856,7 @@ function atualizarEstrelas() {
     document.body.classList.toggle("ldz-icons-dia", ciclo.ehDia);
     if (ciclo.ehDia) {
         stars.style.opacity = 0;
-		document.body.style.color = "#10438f";
+		document.body.style.color = document.body.classList.contains("ldz-entardecer") ? "#182642" : "#10438f";
         return;
     }
 

@@ -782,3 +782,35 @@ input:focus-visible, button:focus-visible, .btn-ipmet:focus-visible {
       width:min(100%, 13rem);
    }
 }
+
+/* Ao entardecer, o vidro claro não deixa a cor do céu reduzir o contraste. */
+:root:not(.modo-leve) .ldz-entardecer :is(.resumo-clima, .previsao-card, .dados-astro .item) {
+   background:rgba(248,247,255,.93);
+   color:#182642;
+   border-color:rgba(255,255,255,.72);
+   box-shadow:0 5px 18px rgba(35,40,70,.13);
+}
+:root:not(.modo-leve) .ldz-entardecer :is(.previsao-card .hora, .previsao-card .chuva, .dados-astro .item span) {
+   color:#334766;
+   opacity:1;
+}
+:root:not(.modo-leve) .ldz-entardecer :is(.resumo-clima, .previsao) {
+   --ldz-ciano:#12598a;
+   --ldz-dourado:#8a4800;
+}
+:root:not(.modo-leve) .ldz-entardecer .ldz-alerta-forte { color:#9b1930; }
+:root:not(.modo-leve) .ldz-entardecer .ldz-alerta { color:#764600; }
+:root:not(.modo-leve) .ldz-entardecer .ldz-estavel { color:#086544; }
+/* Títulos sobre o céu, inclusive enquanto o crepúsculo escurece. */
+.ldz-crepusculo :is(.topo h1, .previsao > h2, footer),
+.modo-leve .ldz-entardecer :is(.topo h1, .previsao > h2, footer) {
+   width:fit-content;
+   max-width:100%;
+   padding:.3em .65em;
+   border-radius:.6em;
+   background:#23334e;
+   color:#f4f7fc;
+   opacity:1;
+}
+.ldz-crepusculo :is(.topo h1, .astro > h2),
+.modo-leve .ldz-entardecer :is(.topo h1, .astro > h2) { margin-inline:auto; }

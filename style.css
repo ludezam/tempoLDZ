@@ -801,3 +801,46 @@ input:focus-visible, button:focus-visible, .btn-ipmet:focus-visible {
 :root:not(.modo-leve) .ldz-icons-dia .ldz-alerta-forte { color:#9b1930; }
 :root:not(.modo-leve) .ldz-icons-dia .ldz-alerta { color:#764600; }
 :root:not(.modo-leve) .ldz-icons-dia .ldz-estavel { color:#086544; }
+
+/* Base de contraste para os controles sobre o céu em movimento.
+   Os ícones de traço usam a mesma cor do texto (currentColor). */
+:root:not(.modo-leve) body {
+   --controle-texto:#f4f7fc;
+   --controle-placeholder:#dbe6f4;
+   --controle-fundo:rgba(13,30,54,.80);
+   --controle-hover:rgba(26,47,75,.88);
+   --controle-borda:rgba(219,230,244,.45);
+   --controle-foco:#b8daff;
+}
+:root:not(.modo-leve) body.ldz-icons-dia {
+   --controle-texto:#102c54;
+   --controle-placeholder:#3a526d;
+   --controle-fundo:rgba(239,248,255,.84);
+   --controle-hover:rgba(248,252,255,.94);
+   --controle-borda:#526c89;
+   --controle-foco:#143a67;
+}
+:root:not(.modo-leve) :is(.controles input, .controles button, .radar .btn-ipmet) {
+   color:var(--controle-texto);
+   background:var(--controle-fundo);
+   border-color:var(--controle-borda);
+   caret-color:currentColor;
+}
+:root:not(.modo-leve) .controles input::placeholder {
+   color:var(--controle-placeholder);
+   opacity:1;
+}
+:root:not(.modo-leve) :is(.controles button, .radar .btn-ipmet):hover {
+   background:var(--controle-hover);
+}
+:root:not(.modo-leve) :is(.controles input, .controles button, .radar .btn-ipmet):focus-visible {
+   outline-color:var(--controle-foco);
+}
+:root:not(.modo-leve) .ldz-icons-dia :is(.item span, .previsao-card .hora, .previsao-card .chuva, footer) {
+   opacity:.94;
+}
+.modo-leve .controles .btn-modo {
+   color:#f4f7fc;
+   background:#22354d;
+}
+.modo-leve .controles .btn-modo:hover { background:#304a69; }
